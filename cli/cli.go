@@ -9,6 +9,10 @@ import (
 )
 
 func HandleArgs(args []string) {
+	if len(args) == 0 {
+		return
+	}
+
 	command := args[1]
 
 	// TODO: handle params
@@ -23,5 +27,5 @@ func handleFile(file *string) {
 		return
 	}
 
-	gru.HandleFile(file)
+	gru.DoFile(file)
 }
