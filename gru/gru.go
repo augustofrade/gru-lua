@@ -38,6 +38,8 @@ func RegisterDefaultModules() {
 	// gru table
 	_l.NewTable()
 
+	RegisterGruModule(NewColorsModule())
+
 	_l.SetGlobal("gru")
 }
 
