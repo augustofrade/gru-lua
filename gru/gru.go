@@ -45,6 +45,15 @@ func DoFile(file *string) {
 	}
 }
 
+// Evalutes the passed Lua code
+func Evalute(code *string) {
+	initGru()
+
+	if err := lua.DoString(_l, *code); err != nil {
+		fmt.Println(err)
+	}
+}
+
 // Sets all default Go Gru modules into a module sice.
 func InitDefaultModules() {
 	RegisteredModules = append(RegisteredModules, NewColorsModule())
