@@ -49,7 +49,7 @@ func DoFile(file *string) {
 func InitDefaultModules() {
 	RegisteredModules = append(RegisteredModules, NewColorsModule())
 	RegisteredModules = append(RegisteredModules, NewJsonModule())
-
+	RegisteredModules = append(RegisteredModules, NewTimeModule())
 }
 
 // Registers all default Gru modules into Lua tables accessed through the default "gru" global table.
@@ -90,4 +90,15 @@ func (module *GruModule) Register(funcName string, description string, function 
 		Description:    description,
 		Implementation: function,
 	})
+}
+
+func LuaError(message string) int {
+	_l.PushNil()
+	_l.PushString(message)
+	return 2
+}
+
+func LuaVoidError(message string) int {
+	_l.PushString(message)
+	return 1
 }
