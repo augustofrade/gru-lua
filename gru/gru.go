@@ -17,7 +17,6 @@ type GruModule struct {
 	Name        string
 	Description string
 	Functions   []GruFunction
-	l           *lua.State
 }
 
 // A callable function through gru.<module-name>.<function-name>
@@ -49,6 +48,8 @@ func DoFile(file *string) {
 // Sets all default Go Gru modules into a module sice.
 func InitDefaultModules() {
 	RegisteredModules = append(RegisteredModules, NewColorsModule())
+	RegisteredModules = append(RegisteredModules, NewJsonModule())
+
 }
 
 // Registers all default Gru modules into Lua tables accessed through the default "gru" global table.
@@ -78,7 +79,6 @@ func NewModule(name string, description string) GruModule {
 	return GruModule{
 		Name:        name,
 		Description: description,
-		l:           _l,
 		Functions:   make([]GruFunction, 0),
 	}
 }
