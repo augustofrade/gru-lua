@@ -58,10 +58,10 @@ func pathJoin(l *lua.State) int {
 	parts := make([]string, count)
 
 	for i := 1; i <= count; i++ {
-		value, valid := l.ToString(i)
-		if !valid {
-			return LuaError(fmt.Sprintf("Expected string in argument %d", i))
+		if !l.IsString(i) {
+			return LuaError(fmt.Sprintf("Expected string or number in argument %d", i))
 		}
+		value, _ := l.ToString(i)
 		parts[i-1] = value
 	}
 
