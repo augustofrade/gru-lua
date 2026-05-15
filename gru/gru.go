@@ -59,6 +59,7 @@ func InitDefaultModules() {
 	RegisteredModules = append(RegisteredModules, NewColorsModule())
 	RegisteredModules = append(RegisteredModules, NewJsonModule())
 	RegisteredModules = append(RegisteredModules, NewTimeModule())
+	RegisteredModules = append(RegisteredModules, NewPathModule())
 }
 
 // Registers all default Gru modules into Lua tables accessed through the default "gru" global table.
@@ -107,7 +108,18 @@ func LuaError(message string) int {
 	return 2
 }
 
+// TODO: remove this
 func LuaVoidError(message string) int {
 	_l.PushString(message)
+	return 1
+}
+
+func LuaStringResult(value string) int {
+	_l.PushString(value)
+	return 1
+}
+
+func LuaBoolResult(value bool) int {
+	_l.PushBoolean(value)
 	return 1
 }
