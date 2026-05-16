@@ -22,6 +22,8 @@ func HandleArgs(args []string) {
 
 	// TODO: handle params
 	switch command {
+	case "init":
+		initCommand(&subCommand)
 	case "help":
 		helpCommand()
 	case "modules", "mod":
@@ -47,8 +49,10 @@ func handleFile(file *string) {
 
 func helpCommand() {
 	fmt.Println("Available commands:")
-	fmt.Println("modules <module>  Describes all available modules or the specified module")
-	fmt.Println("eval    <code>    Evalutes the passed Lua code")
-	fmt.Println("help              This message")
+	fmt.Println("init    <path>     Inits a git repository in the provided path, alongside .gitignore and gru type annotations files. Defaults to current dir")
+	fmt.Println("types   <path>     Creates a gru type annotations file in the given path. Defaults to current dir")
+	fmt.Println("modules <module>   Describes all available modules or the specified module")
+	fmt.Println("eval    <code>     Evalutes the passed Lua code")
+	fmt.Println("help               This message")
 	fmt.Println("\nIf the passed value is not found as a command, it will be treated as a lua file: 'gru main.lua'")
 }

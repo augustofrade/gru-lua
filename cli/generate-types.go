@@ -23,12 +23,16 @@ func generateTypesCommand(path *string) {
 		return
 	}
 
+	generateLuaTypeAnnotations(fullPath)
+}
+
+func generateLuaTypeAnnotations(fullPath *string) {
 	os.MkdirAll(filepath.Dir(*fullPath), 0755)
 
 	gru.InitDefaultModules()
 	fileContent := buildTypeAnnotations()
 
-	err = os.WriteFile(*fullPath, fileContent, 0644)
+	err := os.WriteFile(*fullPath, fileContent, 0644)
 	if err != nil {
 		fmt.Println(err)
 		return
