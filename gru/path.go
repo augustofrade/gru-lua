@@ -9,11 +9,26 @@ import (
 
 func NewPathModule() GruModule {
 	module := NewModule("path", "System Path operations")
-	module.Register("basename", "Returns the last portion of the path", pathBasename)
-	module.Register("dirname", "Returns the directory name of the path", pathDirname)
-	module.Register("extname", "Returns the file extension", pathExtname)
-	module.Register("isAbsolute", "Checks if the path is absolute", pathIsAbsolute)
-	module.Register("join", "Joins path elements", pathJoin)
+	module.FunctionBuilder("basename", "Returns the last portion of the path", pathBasename).
+		StringParam("path", "").
+		ReturnsString().
+		Register()
+	module.FunctionBuilder("dirname", "Returns the directory name of the path", pathDirname).
+		StringParam("path", "").
+		ReturnsString().
+		Register()
+	module.FunctionBuilder("extname", "Returns the file extension", pathExtname).
+		StringParam("path", "").
+		ReturnsString().
+		Register()
+	module.FunctionBuilder("isAbsolute", "Checks if the path is absolute", pathIsAbsolute).
+		StringParam("path", "").
+		ReturnsBoolean().
+		Register()
+	module.FunctionBuilder("join", "Joins path elements", pathJoin).
+		Vararg("string|number").
+		ReturnsString().
+		Register()
 	return module
 }
 

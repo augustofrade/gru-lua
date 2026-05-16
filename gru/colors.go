@@ -23,22 +23,54 @@ var colorCodes = map[string]string{
 
 func NewColorsModule() GruModule {
 	module := NewModule("colors", "Write colored text int the terminal")
-	module.Register("red", "Red color", redColor)
-	module.Register("black", "Black color", blackColor)
-	module.Register("green", "Green color", greenColor)
-	module.Register("yellow", "Yellow color", yellowColor)
-	module.Register("blue", "Blue color", blueColor)
-	module.Register("magenta", "Magenta color", magentaColor)
-	module.Register("cyan", "Cyan color", cyanColor)
-	module.Register("white", "White color", whiteColor)
-	module.Register("brightBlack", "Bright black color", brightBlackColor)
-	module.Register("brightRed", "Bright red color", brightRedColor)
-	module.Register("brightGreen", "Bright green color", brightGreenColor)
-	module.Register("brightYellow", "Bright yellow color", brightYellowColor)
-	module.Register("brightBlue", "Bright blue color", brightBlueColor)
-	module.Register("brightMagenta", "Bright magenta color", brightMagentaColor)
-	module.Register("brightCyan", "Bright cyan color", brightCyanColor)
-	module.Register("brightWhite", "Bright white color", brightWhiteColor)
+	module.FunctionBuilder("red", "Red color", redColor).
+		StringParam("text", "Text to be colored").
+		Register()
+	module.FunctionBuilder("black", "Black color", blackColor).
+		StringParam("text", "Text to be colored").
+		Register()
+	module.FunctionBuilder("green", "Green color", greenColor).
+		StringParam("text", "Text to be colored").
+		Register()
+	module.FunctionBuilder("yellow", "Yellow color", yellowColor).
+		StringParam("text", "Text to be colored").
+		Register()
+	module.FunctionBuilder("blue", "Blue color", blueColor).
+		StringParam("text", "Text to be colored").
+		Register()
+	module.FunctionBuilder("magenta", "Magenta color", magentaColor).
+		StringParam("text", "Text to be colored").
+		Register()
+	module.FunctionBuilder("cyan", "Cyan color", cyanColor).
+		StringParam("text", "Text to be colored").
+		Register()
+	module.FunctionBuilder("white", "White color", whiteColor).
+		StringParam("text", "Text to be colored").
+		Register()
+	module.FunctionBuilder("brightBlack", "Bright black color", brightBlackColor).
+		StringParam("text", "Text to be colored").
+		Register()
+	module.FunctionBuilder("brightRed", "Bright red color", brightRedColor).
+		StringParam("text", "Text to be colored").
+		Register()
+	module.FunctionBuilder("brightGreen", "Bright green color", brightGreenColor).
+		StringParam("text", "Text to be colored").
+		Register()
+	module.FunctionBuilder("brightYellow", "Bright yellow color", brightYellowColor).
+		StringParam("text", "Text to be colored").
+		Register()
+	module.FunctionBuilder("brightBlue", "Bright blue color", brightBlueColor).
+		StringParam("text", "Text to be colored").
+		Register()
+	module.FunctionBuilder("brightMagenta", "Bright magenta color", brightMagentaColor).
+		StringParam("text", "Text to be colored").
+		Register()
+	module.FunctionBuilder("brightCyan", "Bright cyan color", brightCyanColor).
+		StringParam("text", "Text to be colored").
+		Register()
+	module.FunctionBuilder("brightWhite", "Bright white color", brightWhiteColor).
+		StringParam("text", "Text to be colored").
+		Register()
 	return module
 }
 

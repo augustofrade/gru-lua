@@ -8,7 +8,9 @@ import (
 
 func NewJsonModule() GruModule {
 	module := NewModule("json", "JSON methods")
-	module.Register("stringify", "Converts a table into a string", jsonStringify)
+	module.FunctionBuilder("stringify", "Converts a table", jsonStringify).
+		TableParam("json", "The json to be stringified").
+		Register()
 	return module
 }
 
@@ -48,7 +50,7 @@ func jsonStringify(l *lua.State) int {
 		// TODO: handle table (object/array) props
 
 		result[key] = val
-		l.Pop(1) // remove valor, mantém chave para Next()
+		l.Pop(1)
 	}
 
 	out, _ := json.Marshal(result)

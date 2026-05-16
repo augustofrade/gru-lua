@@ -101,15 +101,6 @@ func NewModule(name string, description string) GruModule {
 	}
 }
 
-// Registers a Go function in the Lua GruModule
-func (module *GruModule) Register(funcName string, description string, function LuaInteropFunc) {
-	module.RegisterGruFunction(GruFunction{
-		Name:           funcName,
-		Description:    description,
-		Implementation: function,
-	})
-}
-
 // Registers a built GruFunction in the Lua GruModule
 func (module *GruModule) RegisterGruFunction(function GruFunction) {
 	module.Functions = append(module.Functions, function)

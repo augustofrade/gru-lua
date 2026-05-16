@@ -10,7 +10,7 @@ type GruFunctionBuilder struct {
 }
 
 // Builds and registers the function
-func (f GruFunctionBuilder) Register() {
+func (f *GruFunctionBuilder) Register() {
 	f.module.RegisterGruFunction(
 		GruFunction{
 			Name:           f.name,

@@ -8,7 +8,10 @@ import (
 
 func NewTimeModule() GruModule {
 	module := NewModule("time", "Time related operations")
-	module.Register("sleep", "Sleeps for <duration> seconds", timeSleep)
+	module.FunctionBuilder("sleep", "Sleeps for <duration> seconds", timeSleep).
+		NumberParam("seconds", "Duration in seconds").
+		Register()
+
 	return module
 }
 
