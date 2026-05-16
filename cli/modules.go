@@ -23,7 +23,10 @@ func modulesCommand(maxModuleSize int, specifiedModule string) {
 	}
 
 	if module == nil {
-		fmt.Println("Gru module not found")
+		fmt.Println("Gru module not found. Expected one of the below:")
+		for _, mod := range gru.RegisteredModules {
+			fmt.Printf("  %s\n", mod.Name)
+		}
 		return
 	}
 
