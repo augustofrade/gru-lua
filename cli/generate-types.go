@@ -47,7 +47,7 @@ func buildTypeAnnotations() []byte {
 	builder.WriteString("---@alias GruError string\n")
 
 	for _, module := range gru.RegisteredModules {
-		luaModuleName := "Gru" + strings.ToUpper(string(module.Name[0])) + module.Name[1:]
+		luaModuleName := "Gru" + strings.ToUpper(string(module.Name[0])) + module.Name[1:] + "Module"
 		moduleListBuilder.WriteString("---@field ")
 		moduleListBuilder.WriteString(module.Name)
 		moduleListBuilder.WriteString(" ")
@@ -61,7 +61,14 @@ func buildTypeAnnotations() []byte {
 		for _, function := range module.Functions {
 			builder.WriteString("\n---@field ")
 			builder.WriteString(function.Name)
-			builder.WriteString(" fun(): nil")
+			builder.WriteString(" fun(")
+			for _, param := range function.Parameters {
+				builder.WriteString(param.Name + ": " + param.Type)
+			}
+			builder.WriteString(")")
+			if len(function.ReturnTypes) > 0 {
+				builder.WriteString(": " + strings.Join(function.ReturnTypes, ", "))
+			}
 			builder.WriteString(" " + function.Description)
 		}
 		builder.WriteString("\n")
