@@ -6,11 +6,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"slices"
-	"strings"
 )
 
-var gitIgnoreTypesFile string = "#generated with 'gru init'\ngru-types.lua"
+var gitIgnoreTypesFile string = "#generated with 'gru init'"
 
 func initCommand(path *string) {
 	absPath, err := filepath.Abs(*path)
@@ -25,13 +23,17 @@ func initCommand(path *string) {
 		return
 	}
 
+	vscodeDir := filepath.Join(absPath, ".vscode")
+	os.MkdirAll(vscodeDir, 0755)
+
 	fmt.Println("Generating type annotations file...")
-	typesPath := filepath.Join(absPath, "gru-types.lua")
+	typesPath := filepath.Join(vscodeDir, "gru-types.lua")
 	generateLuaTypeAnnotations(&typesPath)
 
+	createVSCodeSettings(filepath.Join(vscodeDir, "settings.json"))
 	createSampleGruLuaFile(filepath.Join(absPath, "main.lua"))
 
-	fmt.Println("Done.\n\nRun your lua code with 'gru main.lua'")
+	fmt.Println("Done.\n\nRun your lua code 'gru main.lua'")
 }
 
 func handlePathGitRepository(path *string) error {
@@ -70,31 +72,13 @@ func handlePathGitRepository(path *string) error {
 		}
 	}
 
-	if hasGitIgnore {
-		fmt.Println("Found .gitignore...")
-		return handleExistentGitIgnoreFile(&gitIgnorePath)
+	if !hasGitIgnore {
+		fmt.Println("Creating new .gitignore file...")
+		return createGitIgnoreFile(&gitIgnorePath)
 	}
 
-	fmt.Println("Creating new .gitignore file...")
-	return createGitIgnoreFile(&gitIgnorePath)
-}
-
-func handleExistentGitIgnoreFile(gitIgnorePath *string) error {
-	fileBytes, err := os.ReadFile(*gitIgnorePath)
-	if err != nil {
-		return err
-	}
-
-	fileContent := string(fileBytes)
-
-	if slices.Contains(strings.Split(fileContent, "\n"), "gru-types.lua") {
-		fmt.Println("Found type annotations file name in .gitignore...")
-		return nil
-	}
-
-	fileContent = fileContent + "\n" + gitIgnoreTypesFile
-	err = os.WriteFile(*gitIgnorePath, []byte(fileContent), 0644)
-	return err
+	fmt.Println("Found .gitignore...")
+	return nil
 }
 
 func createGitIgnoreFile(gitIgnorePath *string) error {
@@ -114,5 +98,24 @@ func createSampleGruLuaFile(path string) error {
 	}
 
 	os.WriteFile(path, []byte("print(gru.colors.lightBlue('Hello, world!'))"), 0644)
+	return nil
+}
+
+func createVSCodeSettings(settingsPath string) error {
+	_, err := os.Stat(settingsPath)
+	if err == nil {
+		// file already exists
+		return nil
+	}
+
+	if !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+
+	settingsContent := `{
+  "Lua.workspace.library": [".vscode"]
+}
+`
+	os.WriteFile(settingsPath, []byte(settingsContent), 0644)
 	return nil
 }
