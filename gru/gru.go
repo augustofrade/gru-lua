@@ -23,7 +23,16 @@ type GruModule struct {
 type GruFunction struct {
 	Name           string
 	Description    string
+	Parameters     []GruFunctionParameter
 	Implementation LuaInteropFunc
+	returnTypes    []string
+}
+
+type GruFunctionParameter struct {
+	Name        string
+	Description string
+	Type        string
+	Vararg      bool
 }
 
 // Inits the VM with all default Lua and Gru libraries
@@ -93,13 +102,29 @@ func NewModule(name string, description string) GruModule {
 	}
 }
 
-// Registers a function for the GruModule
+// Registers a Go function in the Lua GruModule
 func (module *GruModule) Register(funcName string, description string, function LuaInteropFunc) {
-	module.Functions = append(module.Functions, GruFunction{
+	module.RegisterGruFunction(GruFunction{
 		Name:           funcName,
 		Description:    description,
 		Implementation: function,
 	})
+}
+
+// Registers a built GruFunction in the Lua GruModule
+func (module *GruModule) RegisterGruFunction(function GruFunction) {
+	module.Functions = append(module.Functions, function)
+}
+
+// Creates a FunctionBuilder for GruFunctions
+func (module *GruModule) FunctionBuilder(name string, description string, function LuaInteropFunc) *GruFunctionBuilder {
+	return &GruFunctionBuilder{
+		name:        name,
+		description: description,
+		function:    function,
+		parameters:  make([]GruFunctionParameter, 0),
+		module:      module,
+	}
 }
 
 func LuaError(message string) int {
