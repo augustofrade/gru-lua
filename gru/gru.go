@@ -25,14 +25,13 @@ type GruFunction struct {
 	Description    string
 	Parameters     []GruFunctionParameter
 	Implementation LuaInteropFunc
-	returnTypes    []string
+	ReturnTypes    []string
 }
 
 type GruFunctionParameter struct {
 	Name        string
 	Description string
 	Type        string
-	Vararg      bool
 }
 
 // Inits the VM with all default Lua and Gru libraries

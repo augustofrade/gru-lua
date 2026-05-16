@@ -16,7 +16,7 @@ func (f GruFunctionBuilder) Register() {
 			Name:           f.name,
 			Description:    f.description,
 			Parameters:     f.parameters,
-			returnTypes:    f.returnTypes,
+			ReturnTypes:    f.returnTypes,
 			Implementation: f.function,
 		})
 }
@@ -31,9 +31,28 @@ func (f *GruFunctionBuilder) ReturnsNil() *GruFunctionBuilder {
 	return f
 }
 
+func (f *GruFunctionBuilder) ReturnsString() *GruFunctionBuilder {
+	f.returnTypes = append(f.returnTypes, "string")
+	return f
+}
+
+func (f *GruFunctionBuilder) ReturnsBoolean() *GruFunctionBuilder {
+	f.returnTypes = append(f.returnTypes, "boolean")
+	return f
+}
+
+func (f *GruFunctionBuilder) ReturnsNumber() *GruFunctionBuilder {
+	f.returnTypes = append(f.returnTypes, "number")
+	return f
+}
+
 func (f *GruFunctionBuilder) ReturnsWithError(returnType string) *GruFunctionBuilder {
 	f.returnTypes = append(f.returnTypes, returnType, "GruError")
 	return f
+}
+
+func (f *GruFunctionBuilder) Vararg(paramType string) *GruFunctionBuilder {
+	return f.Param("...", paramType, "")
 }
 
 func (f *GruFunctionBuilder) StringParam(name string, description string) *GruFunctionBuilder {
@@ -69,7 +88,6 @@ func (f *GruFunctionBuilder) Param(name string, paramType string, description st
 		Name:        name,
 		Description: description,
 		Type:        paramType,
-		Vararg:      false,
 	})
 
 	return f
