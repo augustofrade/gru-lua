@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/augustofrade/gru-lua/gru"
 )
@@ -35,8 +36,6 @@ func printAllModulesInfo(maxModuleSize int) {
 		fmt.Printf("%s [%d]  %s\n", module.Name, len(module.Functions), module.Description)
 
 		printModuleInfo(module, maxModuleSize)
-
-		fmt.Println()
 	}
 
 	fmt.Println("Use 'gru modules <module-name>' to view all functions of the specified module")
@@ -44,13 +43,28 @@ func printAllModulesInfo(maxModuleSize int) {
 
 func printModuleInfo(module gru.GruModule, maxModuleSize int) {
 	functionAmount := len(module.Functions)
-	for i := range functionAmount {
-		function := module.Functions[i]
-		fmt.Printf("  %s()\n    %s\n", function.Name, function.Description)
 
-		if i > 0 && i == maxModuleSize-1 {
-			fmt.Printf("  %d functions not shown...\n", functionAmount-maxModuleSize)
+	builder := strings.Builder{}
+
+	for i := range functionAmount {
+		paramBuilder := strings.Builder{}
+		function := module.Functions[i]
+		fmt.Fprintf(&builder, "  %s(", function.Name)
+
+		for _, param := range function.Parameters {
+			fmt.Fprintf(&builder, "%s: %s", param.Name, param.Type)
+			fmt.Fprintf(&paramBuilder, "    @param %s: %s   %s\n", param.Name, param.Type, param.Description)
+		}
+
+		fmt.Fprintf(&builder, ")\n    %s\n", function.Description)
+		builder.WriteString(paramBuilder.String())
+
+		remainingFuncs := functionAmount - maxModuleSize
+		if remainingFuncs > 0 && i > 0 && i == maxModuleSize-1 {
+			fmt.Fprintf(&builder, "%d functions not shown...\n", remainingFuncs)
 			break
 		}
 	}
+
+	fmt.Println(builder.String())
 }
