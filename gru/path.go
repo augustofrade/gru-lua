@@ -2,6 +2,7 @@ package gru
 
 import (
 	"fmt"
+	"path"
 	"path/filepath"
 
 	"github.com/Shopify/go-lua"
@@ -28,6 +29,12 @@ func NewPathModule() GruModule {
 	module.FunctionBuilder("join", "Joins path elements", pathJoin).
 		Vararg("string|number").
 		ReturnsString().
+		Register()
+	module.FunctionBuilder("split",
+		"Splits a path separating it into a directory and file name. If there is no slash in path, split returns an empty dir and file set to path.",
+		pathSplit).
+		StringParam("path", "path to be split").
+		Returns("table").
 		Register()
 	return module
 }
@@ -76,9 +83,27 @@ func pathJoin(l *lua.State) int {
 		if !l.IsString(i) {
 			return LuaError(fmt.Sprintf("Expected string or number in argument %d", i))
 		}
+		// Numbers in lua are always convertible to string
 		value, _ := l.ToString(i)
 		parts[i-1] = value
 	}
 
 	return LuaStringResult(filepath.Join(parts...))
+}
+
+func pathSplit(l *lua.State) int {
+	if !l.IsString(1) || l.IsNumber(1) {
+		return LuaError("Expected string")
+	}
+
+	value, _ := l.ToString(1)
+
+	dir, file := path.Split(value)
+
+	PushLuaTable(map[string]any{
+		"dir":  dir,
+		"file": file,
+	})
+
+	return 1
 }

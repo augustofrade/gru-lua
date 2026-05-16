@@ -138,3 +138,31 @@ func LuaBoolResult(value bool) int {
 	_l.PushBoolean(value)
 	return 1
 }
+
+// Transforms the map into a Lua table and pushes it onto the stack
+func PushLuaTable(kvp map[string]any) {
+	_l.CreateTable(0, len(kvp))
+	for key, value := range kvp {
+		switch v := value.(type) {
+		case string:
+			_l.PushString(v)
+		case int:
+			_l.PushInteger(v)
+		case int64:
+			_l.PushInteger(int(v))
+		case float32:
+			_l.PushNumber(float64(v))
+		case float64:
+			_l.PushNumber(v)
+		case bool:
+			_l.PushBoolean(v)
+			// TODO: handle arrays/slices
+		case map[string]any:
+			PushLuaTable(v)
+		default:
+			_l.PushString(fmt.Sprint(v))
+		}
+
+		_l.SetField(-2, key)
+	}
+}
