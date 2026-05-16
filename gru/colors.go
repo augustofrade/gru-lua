@@ -3,22 +3,22 @@ package gru
 import "github.com/Shopify/go-lua"
 
 var colorCodes = map[string]string{
-	"black":         "30",
-	"red":           "31",
-	"green":         "32",
-	"yellow":        "33",
-	"blue":          "34",
-	"magenta":       "35",
-	"cyan":          "36",
-	"white":         "37",
-	"brightBlack":   "90",
-	"brightRed":     "91",
-	"brightGreen":   "92",
-	"brightYellow":  "93",
-	"brightBlue":    "94",
-	"brightMagenta": "95",
-	"brightCyan":    "96",
-	"brightWhite":   "97",
+	"black":        "30",
+	"red":          "31",
+	"green":        "32",
+	"yellow":       "33",
+	"blue":         "34",
+	"magenta":      "35",
+	"cyan":         "36",
+	"white":        "37",
+	"lightBlack":   "90",
+	"lightRed":     "91",
+	"lightGreen":   "92",
+	"lightYellow":  "93",
+	"lightBlue":    "94",
+	"lightMagenta": "95",
+	"lightCyan":    "96",
+	"lightWhite":   "97",
 }
 
 func NewColorsModule() GruModule {
@@ -47,28 +47,28 @@ func NewColorsModule() GruModule {
 	module.FunctionBuilder("white", "White color", whiteColor).
 		StringParam("text", "Text to be colored").
 		Register()
-	module.FunctionBuilder("brightBlack", "Bright black color", brightBlackColor).
+	module.FunctionBuilder("lightBlack", "Lright black color", lightBlackColor).
 		StringParam("text", "Text to be colored").
 		Register()
-	module.FunctionBuilder("brightRed", "Bright red color", brightRedColor).
+	module.FunctionBuilder("lightRed", "Lright red color", lightRedColor).
 		StringParam("text", "Text to be colored").
 		Register()
-	module.FunctionBuilder("brightGreen", "Bright green color", brightGreenColor).
+	module.FunctionBuilder("lightGreen", "Lright green color", lightGreenColor).
 		StringParam("text", "Text to be colored").
 		Register()
-	module.FunctionBuilder("brightYellow", "Bright yellow color", brightYellowColor).
+	module.FunctionBuilder("lightYellow", "Lright yellow color", lightYellowColor).
 		StringParam("text", "Text to be colored").
 		Register()
-	module.FunctionBuilder("brightBlue", "Bright blue color", brightBlueColor).
+	module.FunctionBuilder("lightBlue", "Lright blue color", lightBlueColor).
 		StringParam("text", "Text to be colored").
 		Register()
-	module.FunctionBuilder("brightMagenta", "Bright magenta color", brightMagentaColor).
+	module.FunctionBuilder("lightMagenta", "Lright magenta color", lightMagentaColor).
 		StringParam("text", "Text to be colored").
 		Register()
-	module.FunctionBuilder("brightCyan", "Bright cyan color", brightCyanColor).
+	module.FunctionBuilder("lightCyan", "Lright cyan color", lightCyanColor).
 		StringParam("text", "Text to be colored").
 		Register()
-	module.FunctionBuilder("brightWhite", "Bright white color", brightWhiteColor).
+	module.FunctionBuilder("lightWhite", "Lright white color", lightWhiteColor).
 		StringParam("text", "Text to be colored").
 		Register()
 	return module
@@ -113,34 +113,34 @@ func whiteColor(l *lua.State) int {
 	return genericColor(l, colorCodes["white"])
 }
 
-func brightBlackColor(l *lua.State) int {
-	return genericColor(l, colorCodes["brightBlack"])
+func lightBlackColor(l *lua.State) int {
+	return genericColor(l, colorCodes["lightBlack"])
 }
 
-func brightRedColor(l *lua.State) int {
-	return genericColor(l, colorCodes["brightRed"])
+func lightRedColor(l *lua.State) int {
+	return genericColor(l, colorCodes["lightRed"])
 }
 
-func brightGreenColor(l *lua.State) int {
-	return genericColor(l, colorCodes["brightGreen"])
+func lightGreenColor(l *lua.State) int {
+	return genericColor(l, colorCodes["lightGreen"])
 }
 
-func brightYellowColor(l *lua.State) int {
-	return genericColor(l, colorCodes["brightYellow"])
+func lightYellowColor(l *lua.State) int {
+	return genericColor(l, colorCodes["lightYellow"])
 }
 
-func brightBlueColor(l *lua.State) int {
-	return genericColor(l, colorCodes["brightBlue"])
+func lightBlueColor(l *lua.State) int {
+	return genericColor(l, colorCodes["lightBlue"])
 }
 
-func brightMagentaColor(l *lua.State) int {
-	return genericColor(l, colorCodes["brightMagenta"])
+func lightMagentaColor(l *lua.State) int {
+	return genericColor(l, colorCodes["lightMagenta"])
 }
 
-func brightCyanColor(l *lua.State) int {
-	return genericColor(l, colorCodes["brightCyan"])
+func lightCyanColor(l *lua.State) int {
+	return genericColor(l, colorCodes["lightCyan"])
 }
 
-func brightWhiteColor(l *lua.State) int {
-	return genericColor(l, colorCodes["brightWhite"])
+func lightWhiteColor(l *lua.State) int {
+	return genericColor(l, colorCodes["lightWhite"])
 }
