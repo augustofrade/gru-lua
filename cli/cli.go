@@ -24,10 +24,12 @@ func HandleArgs(args []string) {
 	switch command {
 	case "help":
 		helpCommand()
-	case "modules":
+	case "modules", "mod":
 		modulesCommand(5, subCommand)
 	case "eval":
 		gru.Evalute(&subCommand)
+	case "generate-types", "types":
+		generateTypesCommand(&subCommand)
 	default:
 		handleFile(&command)
 	}
