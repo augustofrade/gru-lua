@@ -22,7 +22,7 @@ func NewPathModule() GruModule {
 		StringParam("path", "").
 		ReturnsString().
 		Register()
-	module.FunctionBuilder("isAbsolute", "Checks if the path is absolute", pathIsAbsolute).
+	module.FunctionBuilder("is_absolute", "Checks if the path is absolute", pathIsAbsolute).
 		StringParam("path", "").
 		ReturnsBoolean().
 		Register()
@@ -35,6 +35,13 @@ func NewPathModule() GruModule {
 		pathSplit).
 		StringParam("path", "path to be split").
 		Returns("table").
+		Register()
+
+	module.FunctionBuilder("absolute",
+		"Returns an absolute representation of a path. If the path is not absolute it will be joined with the current working directory to turn it into an absolute path.",
+		pathAbsolute).
+		StringParam("path", "path to be handled").
+		ReturnsString().
 		Register()
 	return module
 }
@@ -106,4 +113,19 @@ func pathSplit(l *lua.State) int {
 	})
 
 	return 1
+}
+
+func pathAbsolute(l *lua.State) int {
+	if !l.IsString(1) || l.IsNumber(1) {
+		return LuaError("Expected string")
+	}
+
+	value, _ := l.ToString(1)
+
+	absPath, err := filepath.Abs(value)
+	if err != nil {
+		return LuaError(err.Error())
+	}
+
+	return LuaStringResult(absPath)
 }
