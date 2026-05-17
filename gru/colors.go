@@ -47,28 +47,28 @@ func NewColorsModule() GruModule {
 	module.FunctionBuilder("white", "White color", whiteColor).
 		StringParam("text", "Text to be colored").
 		Register()
-	module.FunctionBuilder("lightBlack", "Lright black color", lightBlackColor).
+	module.FunctionBuilder("light_black", "Lright black color", lightBlackColor).
 		StringParam("text", "Text to be colored").
 		Register()
-	module.FunctionBuilder("lightRed", "Lright red color", lightRedColor).
+	module.FunctionBuilder("light_red", "Lright red color", lightRedColor).
 		StringParam("text", "Text to be colored").
 		Register()
-	module.FunctionBuilder("lightGreen", "Lright green color", lightGreenColor).
+	module.FunctionBuilder("light_green", "Lright green color", lightGreenColor).
 		StringParam("text", "Text to be colored").
 		Register()
-	module.FunctionBuilder("lightYellow", "Lright yellow color", lightYellowColor).
+	module.FunctionBuilder("light_yellow", "Lright yellow color", lightYellowColor).
 		StringParam("text", "Text to be colored").
 		Register()
-	module.FunctionBuilder("lightBlue", "Lright blue color", lightBlueColor).
+	module.FunctionBuilder("light_blue", "Lright blue color", lightBlueColor).
 		StringParam("text", "Text to be colored").
 		Register()
-	module.FunctionBuilder("lightMagenta", "Lright magenta color", lightMagentaColor).
+	module.FunctionBuilder("light_magenta", "Lright magenta color", lightMagentaColor).
 		StringParam("text", "Text to be colored").
 		Register()
-	module.FunctionBuilder("lightCyan", "Lright cyan color", lightCyanColor).
+	module.FunctionBuilder("light_cyan", "Lright cyan color", lightCyanColor).
 		StringParam("text", "Text to be colored").
 		Register()
-	module.FunctionBuilder("lightWhite", "Lright white color", lightWhiteColor).
+	module.FunctionBuilder("light_white", "Lright white color", lightWhiteColor).
 		StringParam("text", "Text to be colored").
 		Register()
 	return module

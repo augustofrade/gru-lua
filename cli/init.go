@@ -97,7 +97,7 @@ func createSampleGruLuaFile(path string) error {
 		return err
 	}
 
-	os.WriteFile(path, []byte("print(gru.colors.lightBlue('Hello, world!'))"), 0644)
+	os.WriteFile(path, []byte("print(gru.colors.light_blue('Hello, world!'))"), 0644)
 	return nil
 }
 

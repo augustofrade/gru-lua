@@ -9,7 +9,7 @@ all with documented type annotations.
 local basename = gru.path.basename("~/Downloads/image.jpg")
 local fullPath = gru.path.join("~/Documents", "assets", "sprites", basename)
 
-print(gru.colors.lightBlue(fullPath))
+print(gru.colors.light_blue(fullPath))
 ```
 
 ## Why Gru
