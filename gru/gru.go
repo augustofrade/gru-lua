@@ -6,9 +6,13 @@ import (
 	"github.com/Shopify/go-lua"
 )
 
+const runtimeCurrentVersion string = "0.0.1"
+
 var _l *lua.State
 
 var RegisteredModules = make([]GruModule, 0)
+
+const errorCallbackRegistryKey = "gru.runtime.on_error"
 
 type LuaInteropFunc func(l *lua.State) int
 
@@ -49,6 +53,13 @@ func DoFile(file *string) {
 	initGru()
 
 	if err := lua.DoFile(_l, *file); err != nil {
+		_l.Field(lua.RegistryIndex, errorCallbackRegistryKey)
+		if _l.IsFunction(-1) {
+			_l.PushString(err.Error())
+			_l.ProtectedCall(1, 0, 0)
+		} else {
+			_l.Pop(1)
+		}
 		fmt.Println(err)
 	}
 }
@@ -68,6 +79,7 @@ func InitDefaultModules() {
 	RegisteredModules = append(RegisteredModules, NewJsonModule())
 	RegisteredModules = append(RegisteredModules, NewTimeModule())
 	RegisteredModules = append(RegisteredModules, NewPathModule())
+	RegisteredModules = append(RegisteredModules, NewRuntimeModule())
 }
 
 // Registers all default Gru modules into Lua tables accessed through the default "gru" global table.
