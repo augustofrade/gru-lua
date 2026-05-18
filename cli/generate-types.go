@@ -113,7 +113,7 @@ func resolveTypesFilePath(path *string) (*string, error) {
 		return nil, fmt.Errorf("Invalid path")
 	}
 
-	if pathExt == "" {
+	if pathExt == "" || pathExt == "." {
 		fullPath = filepath.Join(fullPath, filename)
 	} else if pathExt != ".lua" {
 		fullPath = filepath.Join(filepath.Dir(fullPath), filename)

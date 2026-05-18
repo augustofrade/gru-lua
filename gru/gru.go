@@ -94,13 +94,19 @@ func RegisterDefaultModules() {
 	_l.SetGlobal("gru")
 }
 
-// Registers a new Gru module alongside all its functions
+// Registers a new Gru module alongside all its functions as Lua tables and functions
 func RegisterGruModule(module GruModule) {
 	_l.NewTable()
 	for _, function := range module.Functions {
 		_l.PushGoFunction(lua.Function(function.Implementation))
+		// sets the function (top of stack) as value of function.Name key
+		// table[function.Name] = GoFunction
+		//
 		_l.SetField(-2, function.Name)
 	}
+	// all functions have been popped from the stack,
+	// therefore the top of the stack is the module Lua table
+	// gruTable[module.Name] = moduleTable
 	_l.SetField(-2, module.Name)
 }
 
