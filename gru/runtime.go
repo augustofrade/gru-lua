@@ -2,6 +2,7 @@ package gru
 
 import (
 	"github.com/Shopify/go-lua"
+	"github.com/augustofrade/gru-lua/gru/internal/luautil"
 )
 
 func NewRuntimeModule() GruModule {
@@ -24,7 +25,7 @@ func runtimeVersion(l *lua.State) int {
 
 func runtimeOnError(l *lua.State) int {
 	if !l.IsFunction(1) {
-		return LuaError("Expected a function")
+		return luautil.ErrorResult(l, "Expected a function")
 	}
 
 	l.PushValue(1)

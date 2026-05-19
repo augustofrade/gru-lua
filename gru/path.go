@@ -1,11 +1,11 @@
 package gru
 
 import (
-	"fmt"
 	"path/filepath"
 	"strings"
 
 	"github.com/Shopify/go-lua"
+	"github.com/augustofrade/gru-lua/gru/internal/luautil"
 )
 
 func NewPathModule() GruModule {
@@ -74,79 +74,79 @@ func NewPathModule() GruModule {
 }
 
 func pathBasename(l *lua.State) int {
-	if !l.IsString(1) || l.IsNumber(1) {
-		return LuaError("Expected string")
+	if !luautil.IsString(l, 1) {
+		return luautil.ErrorResult(l, "Expected string")
 	}
 
 	value, _ := l.ToString(1)
 
-	return LuaStringResult(filepath.Base(value))
+	return luautil.StringResult(l, filepath.Base(value))
 }
 
 func pathDirname(l *lua.State) int {
-	if !l.IsString(1) || l.IsNumber(1) {
-		return LuaError("Expected string")
+	if !luautil.IsString(l, 1) {
+		return luautil.ErrorResult(l, "Expected string")
 	}
 
 	value, _ := l.ToString(1)
 
-	return LuaStringResult(filepath.Dir(value))
+	return luautil.StringResult(l, filepath.Dir(value))
 }
 
 func pathExtname(l *lua.State) int {
-	if !l.IsString(1) || l.IsNumber(1) {
-		return LuaError("Expected string")
+	if !luautil.IsString(l, 1) {
+		return luautil.ErrorResult(l, "Expected string")
 	}
 
 	value, _ := l.ToString(1)
 
-	return LuaStringResult(filepath.Ext(value))
+	return luautil.StringResult(l, filepath.Ext(value))
 }
 
 func pathIsAbsolute(l *lua.State) int {
-	if !l.IsString(1) || l.IsNumber(1) {
-		return LuaError("Expected string")
+	if !luautil.IsString(l, 1) {
+		return luautil.ErrorResult(l, "Expected string")
 	}
 
 	value, _ := l.ToString(1)
 
-	return LuaBoolResult(filepath.IsAbs(value))
+	return luautil.BoolResult(l, filepath.IsAbs(value))
 }
 
 func pathIsRelative(l *lua.State) int {
-	if !l.IsString(1) || l.IsNumber(1) {
-		return LuaError("Expected string")
+	if !luautil.IsString(l, 1) {
+		return luautil.ErrorResult(l, "Expected string")
 	}
 
 	value, _ := l.ToString(1)
 
-	return LuaBoolResult(!filepath.IsAbs(value))
+	return luautil.BoolResult(l, !filepath.IsAbs(value))
 }
 
 func pathJoin(l *lua.State) int {
 	count := l.Top()
 	if count == 0 {
-		return LuaError("Expected at least 1 argument")
+		return luautil.ErrorResult(l, "Expected at least 1 argument")
 	}
 
-	parts, err := GetLuaStringVarargs(l, count)
+	parts, err := luautil.GetStringVarargs(l, count)
 	if err != nil {
-		return LuaError(err.Error())
+		return luautil.ErrorResult(l, err.Error())
 	}
 
-	return LuaStringResult(filepath.Join(parts...))
+	return luautil.StringResult(l, filepath.Join(parts...))
 }
 
 func pathParse(l *lua.State) int {
-	if !l.IsString(1) || l.IsNumber(1) {
-		return LuaError("Expected string")
+	if !luautil.IsString(l, 1) {
+		return luautil.ErrorResult(l, "Expected string")
 	}
 
 	value, _ := l.ToString(1)
 
 	dir, file := filepath.Split(value)
 
-	PushLuaTable(map[string]any{
+	luautil.PushTable(l, map[string]any{
 		"dir":  dir,
 		"file": file,
 		"ext":  filepath.Ext(file),
@@ -156,42 +156,42 @@ func pathParse(l *lua.State) int {
 }
 
 func pathAbsolute(l *lua.State) int {
-	if !l.IsString(1) || l.IsNumber(1) {
-		return LuaError("Expected string")
+	if !luautil.IsString(l, 1) {
+		return luautil.ErrorResult(l, "Expected string")
 	}
 
 	value, _ := l.ToString(1)
 
 	absPath, err := filepath.Abs(value)
 	if err != nil {
-		return LuaError(err.Error())
+		return luautil.ErrorResult(l, err.Error())
 	}
 
-	return LuaStringResult(absPath)
+	return luautil.StringResult(l, absPath)
 }
 
 func pathClean(l *lua.State) int {
-	if !l.IsString(1) || l.IsNumber(1) {
-		return LuaError("Expected string")
+	if !luautil.IsString(l, 1) {
+		return luautil.ErrorResult(l, "Expected string")
 	}
 
 	value, _ := l.ToString(1)
 
 	cleanPath := filepath.Clean(value)
 
-	return LuaStringResult(cleanPath)
+	return luautil.StringResult(l, cleanPath)
 }
 
 func pathStem(l *lua.State) int {
-	if !l.IsString(1) || l.IsNumber(1) {
-		return LuaError("Expected string")
+	if !luautil.IsString(l, 1) {
+		return luautil.ErrorResult(l, "Expected string")
 	}
 
 	value, _ := l.ToString(1)
 	value = filepath.Base(value)
 
 	if value == "." || value == ".." {
-		return LuaStringResult(value)
+		return luautil.StringResult(l, value)
 	}
 
 	isHidden := false
@@ -205,16 +205,16 @@ func pathStem(l *lua.State) int {
 		value = "." + value
 	}
 
-	return LuaStringResult(value)
+	return luautil.StringResult(l, value)
 }
 
 func pathRelative(l *lua.State) int {
-	if !l.IsString(1) || l.IsNumber(1) {
-		return LuaError("Expected string in 'base_path' argument")
+	if !luautil.IsString(l, 1) {
+		return luautil.ErrorResult(l, "Expected string in 'base_path' argument")
 	}
 
-	if !l.IsString(2) || l.IsNumber(2) {
-		return LuaError("Expected string in 'target_path' argument")
+	if !luautil.IsString(l, 2) {
+		return luautil.ErrorResult(l, "Expected string in 'target_path' argument")
 	}
 
 	base, _ := l.ToString(1)
@@ -222,24 +222,23 @@ func pathRelative(l *lua.State) int {
 
 	relativePath, err := filepath.Rel(base, target)
 	if err != nil {
-		return LuaError(err.Error())
+		return luautil.ErrorResult(l, err.Error())
 	}
 
-	return LuaStringResult(relativePath)
+	return luautil.StringResult(l, relativePath)
 }
 
 func pathResolve(l *lua.State) int {
 	count := l.Top()
-	parts, err := GetLuaStringVarargs(l, count)
+	parts, err := luautil.GetStringVarargs(l, count)
 	if err != nil {
-		return LuaError(err.Error())
+		return luautil.ErrorResult(l, err.Error())
 	}
 
-	fmt.Println(filepath.IsAbs(filepath.Join(parts...)))
 	resolvedPath, err := filepath.Abs(filepath.Join(parts...))
 	if err != nil {
-		return LuaError(err.Error())
+		return luautil.ErrorResult(l, err.Error())
 	}
 
-	return LuaStringResult(resolvedPath)
+	return luautil.StringResult(l, resolvedPath)
 }

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/Shopify/go-lua"
+	"github.com/augustofrade/gru-lua/gru/internal/luautil"
 )
 
 func NewTimeModule() GruModule {
@@ -20,7 +21,7 @@ func NewTimeModule() GruModule {
 func timeSleep(l *lua.State) int {
 	secs, valid := l.ToNumber(1)
 	if !valid {
-		return LuaVoidError("Expected number string or string")
+		return luautil.PushError(l, "Expected number or a string convertible to a number")
 	}
 
 	time.Sleep(time.Duration(secs) * time.Second)
