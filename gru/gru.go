@@ -6,7 +6,7 @@ import (
 	"github.com/Shopify/go-lua"
 )
 
-const runtimeCurrentVersion string = "0.0.1"
+const runtimeCurrentVersion string = "0.0.2"
 
 var _l *lua.State
 
@@ -133,6 +133,21 @@ func (module *GruModule) FunctionBuilder(name string, description string, functi
 		parameters:  make([]GruFunctionParameter, 0),
 		module:      module,
 	}
+}
+
+func GetLuaStringVarargs(l *lua.State, varargAmount int) ([]string, error) {
+
+	parts := make([]string, varargAmount)
+
+	for i := 1; i <= varargAmount; i++ {
+		if !l.IsString(i) || l.IsNumber(i) {
+			return nil, fmt.Errorf("Expected string in argument %d", i)
+		}
+		value, _ := l.ToString(i)
+		parts[i-1] = value
+	}
+
+	return parts, nil
 }
 
 func LuaError(message string) int {
