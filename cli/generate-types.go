@@ -66,8 +66,13 @@ func buildTypeAnnotations() []byte {
 			builder.WriteString("\n---@field ")
 			builder.WriteString(function.Name)
 			builder.WriteString(" fun(")
-			for _, param := range function.Parameters {
+
+			paramCount := len(function.Parameters)
+			for i, param := range function.Parameters {
 				builder.WriteString(param.Name + ": " + param.Type)
+				if paramCount > 1 && i < paramCount-1 {
+					builder.WriteString(", ")
+				}
 			}
 			builder.WriteString(")")
 			if len(function.ReturnTypes) > 0 {
