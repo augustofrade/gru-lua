@@ -18,11 +18,12 @@ func NewFsModule() GruModule {
 	module := NewModule("fs", "File System operations.")
 	module.HasCustomType("GruDirentry", "").
 		StringProp("name", "Name of the directory entry.").
-		BooleanProp("is_dir", "Whether the entry is a directory")
+		BooleanProp("is_dir", "Whether the entry is a directory").
+		StringProp("parent_path", "Absolute parent path of the directory entry")
 
 	module.FunctionBuilder("read_dir", "Reads the passed dir and returns its contents.", fsReadDir).
 		StringParam("dir", "Dir to be read.").
-		ReturnsWithError("table<string>").
+		ReturnsWithError("GruDirentry[]").
 		Register()
 
 	return module
