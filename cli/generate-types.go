@@ -41,35 +41,25 @@ func generateLuaTypeAnnotations(fullPath *string) {
 
 func buildTypeAnnotations() []byte {
 	builder := strings.Builder{}
+	builder.WriteString("-- Type annotations generated automatically with 'gru generate-types'\n")
+	fmt.Fprintf(&builder, "-- For help about gru use 'gru help'\n---@meta\n\n")
+	builder.WriteString("---@alias GruError string\n")
 
 	moduleListBuilder := strings.Builder{}
 	moduleListBuilder.WriteString("\n---@class Gru\n")
 
-	builder.WriteString("-- Type annotations generated automatically with 'gru generate-types'\n")
-	builder.WriteString("-- For help about gru use 'gru help'\n")
-	builder.WriteString("---@meta\n\n")
-	builder.WriteString("---@alias GruError string\n")
-
 	for _, module := range gru.RegisteredModules {
 		luaModuleName := "Gru" + strings.ToUpper(string(module.Name[0])) + module.Name[1:] + "Module"
-		moduleListBuilder.WriteString("---@field ")
-		moduleListBuilder.WriteString(module.Name)
-		moduleListBuilder.WriteString(" ")
-		moduleListBuilder.WriteString(luaModuleName)
-		moduleListBuilder.WriteString("\n")
+		fmt.Fprintf(&moduleListBuilder, "---@field %s %s\n", module.Name, luaModuleName)
 
-		builder.WriteString("\n---@class ")
-		builder.WriteString(luaModuleName)
-		builder.WriteString(" " + module.Description)
+		fmt.Fprintf(&builder, "\n---@class %s %s", luaModuleName, module.Description)
 
 		for _, function := range module.Functions {
-			builder.WriteString("\n---@field ")
-			builder.WriteString(function.Name)
-			builder.WriteString(" fun(")
+			fmt.Fprintf(&builder, "\n---@field %s fun(", function.Name)
 
 			paramCount := len(function.Parameters)
 			for i, param := range function.Parameters {
-				builder.WriteString(param.Name + ": " + param.Type)
+				fmt.Fprintf(&builder, "%s: %s", param.Name, param.Type)
 				if paramCount > 1 && i < paramCount-1 {
 					builder.WriteString(", ")
 				}
@@ -81,6 +71,15 @@ func buildTypeAnnotations() []byte {
 			builder.WriteString(" " + function.Description)
 		}
 		builder.WriteString("\n")
+		if len(module.Types) > 0 {
+			builder.WriteString("\n-- Types of this Module\n")
+			for _, t := range module.Types {
+				fmt.Fprintf(&builder, "---@class %s %s\n", t.Name, t.Description)
+				for pName, p := range t.Properties {
+					fmt.Fprintf(&builder, "---@field %s %s %s\n", pName, p.Type, p.Description)
+				}
+			}
+		}
 	}
 
 	moduleListBuilder.WriteString("\n---@type Gru\ngru = gru")
