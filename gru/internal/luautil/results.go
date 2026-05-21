@@ -1,6 +1,8 @@
 package luautil
 
-import "github.com/Shopify/go-lua"
+import (
+	"github.com/Shopify/go-lua"
+)
 
 // function(): nil, error
 func ErrorResult(l *lua.State, message string) int {

@@ -9,7 +9,7 @@ import (
 
 func NewEnvModule() GruModule {
 	module := NewModule("env", "Environment operations.")
-	module.FunctionBuilder("set", "Sets an environment variable.", envSet).
+	module.FunctionBuilder("set", "Sets an environment variable. Returns an error string", envSet).
 		StringParam("key", "Key of the environment variable.").
 		StringParam("value", "value to be assigned on the key of the environment variable.").
 		Register()
@@ -35,11 +35,11 @@ func NewEnvModule() GruModule {
 }
 
 func envSet(l *lua.State) int {
-	if !l.IsString(1) {
-		return luautil.PushError(l, "Expected string on 'key' parameter")
+	if !luautil.IsString(l, 1) {
+		return luautil.StringResult(l, "Expected string on 'key' parameter")
 	}
-	if !l.IsString(2) {
-		return luautil.PushError(l, "Expected string on 'value' parameter")
+	if !luautil.IsString(l, 2) {
+		return luautil.StringResult(l, "Expected string on 'value' parameter")
 	}
 
 	key, _ := l.ToString(1)
@@ -47,14 +47,14 @@ func envSet(l *lua.State) int {
 
 	err := os.Setenv(key, value)
 	if err != nil {
-		return luautil.PushError(l, err.Error())
+		return luautil.StringResult(l, err.Error())
 	}
 
 	return 0
 }
 
 func envGet(l *lua.State) int {
-	if !l.IsString(1) {
+	if !luautil.IsString(l, 1) {
 		return luautil.PushError(l, "Expected string on 'key' parameter")
 	}
 
@@ -69,21 +69,21 @@ func envClear(l *lua.State) int {
 }
 
 func envUnset(l *lua.State) int {
-	if !l.IsString(1) {
-		return luautil.PushError(l, "Expected string on 'key' parameter")
+	if !luautil.IsString(l, 1) {
+		return luautil.StringResult(l, "Expected string on 'key' parameter")
 	}
 
 	key, _ := l.ToString(1)
 	err := os.Unsetenv(key)
 	if err != nil {
-		return luautil.PushError(l, err.Error())
+		return luautil.StringResult(l, err.Error())
 	}
 
 	return 0
 }
 
 func envLookup(l *lua.State) int {
-	if !l.IsString(1) {
+	if !luautil.IsString(l, 1) {
 		return luautil.PushError(l, "Expected string on 'key' parameter")
 	}
 

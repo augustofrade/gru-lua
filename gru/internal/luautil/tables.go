@@ -23,7 +23,8 @@ func PushTable(l *lua.State, kvp map[string]any) {
 			l.PushNumber(v)
 		case bool:
 			l.PushBoolean(v)
-			// TODO: handle arrays/slices
+		case []any:
+			PushArrayTable(l, v)
 		case map[string]any:
 			PushTable(l, v)
 		default:
@@ -34,13 +35,43 @@ func PushTable(l *lua.State, kvp map[string]any) {
 	}
 }
 
-func PushStringArrayTable(l *lua.State, data *[]string) {
+func PushArrayTable(l *lua.State, kvp []any) {
+	l.CreateTable(0, len(kvp))
+	for i, value := range kvp {
+		switch v := value.(type) {
+		case string:
+			l.PushString(v)
+		case int:
+			l.PushInteger(v)
+		case int64:
+			l.PushInteger(int(v))
+		case float32:
+			l.PushNumber(float64(v))
+		case float64:
+			l.PushNumber(v)
+		case bool:
+			l.PushBoolean(v)
+
+		case []any:
+			PushArrayTable(l, v)
+		case map[string]any:
+			PushTable(l, v)
+		default:
+			l.PushString(fmt.Sprint(v))
+		}
+
+		l.RawSetInt(-2, i+1)
+	}
+}
+
+func PushStringArrayTable(l *lua.State, data *[]string) int {
 	l.CreateTable(0, len(*data))
 	for i, val := range *data {
 		l.PushString(val)
 		// table.insert(tbl, i+1, val)
 		l.RawSetInt(-2, i+1)
 	}
+	return 1
 }
 
 // Gets the length of the table at index of stack

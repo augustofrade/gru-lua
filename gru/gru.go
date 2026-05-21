@@ -21,6 +21,18 @@ type GruModule struct {
 	Name        string
 	Description string
 	Functions   []GruFunction
+	Types       []*GruModuleType
+}
+
+type GruModuleType struct {
+	Name        string
+	Description string
+	Properties  map[string]GruModuleTypeProperty
+}
+
+type GruModuleTypeProperty struct {
+	Description string
+	Type        string
 }
 
 // A callable function through gru.<module-name>.<function-name>
@@ -82,6 +94,7 @@ func InitDefaultModules() {
 	RegisteredModules = append(RegisteredModules, NewRuntimeModule())
 	RegisteredModules = append(RegisteredModules, NewZipModule())
 	RegisteredModules = append(RegisteredModules, NewEnvModule())
+	RegisteredModules = append(RegisteredModules, NewFsModule())
 }
 
 // Registers all default Gru modules into Lua tables accessed through the default "gru" global table.
@@ -135,4 +148,34 @@ func (module *GruModule) FunctionBuilder(name string, description string, functi
 		parameters:  make([]GruFunctionParameter, 0),
 		module:      module,
 	}
+}
+
+func (module *GruModule) HasCustomType(name string, description string) *GruModuleType {
+	newType := GruModuleType{
+		Name:        name,
+		Description: description,
+		Properties:  make(map[string]GruModuleTypeProperty),
+	}
+	module.Types = append(module.Types, &newType)
+	return &newType
+}
+
+func (cType *GruModuleType) Prop(name string, propType string, description string) *GruModuleType {
+	cType.Properties[name] = GruModuleTypeProperty{
+		Description: description,
+		Type:        propType,
+	}
+	return cType
+}
+
+func (cType *GruModuleType) StringProp(name string, description string) *GruModuleType {
+	return cType.Prop(name, "string", description)
+}
+
+func (cType *GruModuleType) NumberProp(name string, description string) *GruModuleType {
+	return cType.Prop(name, "number", description)
+}
+
+func (cType *GruModuleType) BooleanProp(name string, description string) *GruModuleType {
+	return cType.Prop(name, "boolean", description)
 }
