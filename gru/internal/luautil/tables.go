@@ -33,3 +33,50 @@ func PushTable(l *lua.State, kvp map[string]any) {
 		l.SetField(-2, key)
 	}
 }
+
+func PushStringArrayTable(l *lua.State, data *[]string) {
+	l.CreateTable(0, len(*data))
+	for i, val := range *data {
+		l.PushString(val)
+		// table.insert(tbl, i+1, val)
+		l.RawSetInt(-2, i+1)
+	}
+}
+
+// Gets the length of the table at index of stack
+//
+// ({ "a", "b" }, ...)
+//
+// GetTableLength(1) -> 2
+func GetTableLength(l *lua.State, index int) int {
+	l.Length(index)
+	length, _ := l.ToInteger(-1)
+	l.Pop(1)
+
+	return length
+}
+
+func GetTableStringValues(l *lua.State) (*[]string, error) {
+	values := make([]string, 0)
+
+	i := 1
+	for {
+		l.RawGetInt(1, i)
+		if l.IsNil(-1) {
+			// end of the table
+			l.Pop(1)
+			break
+		}
+
+		if l.IsString(-1) {
+			val, _ := l.ToString(-1)
+			values = append(values, val)
+		} else {
+			return nil, fmt.Errorf("")
+		}
+		l.Pop(1)
+		i++
+	}
+
+	return &values, nil
+}

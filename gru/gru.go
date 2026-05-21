@@ -80,6 +80,8 @@ func InitDefaultModules() {
 	RegisteredModules = append(RegisteredModules, NewTimeModule())
 	RegisteredModules = append(RegisteredModules, NewPathModule())
 	RegisteredModules = append(RegisteredModules, NewRuntimeModule())
+	RegisteredModules = append(RegisteredModules, NewZipModule())
+	RegisteredModules = append(RegisteredModules, NewEnvModule())
 }
 
 // Registers all default Gru modules into Lua tables accessed through the default "gru" global table.

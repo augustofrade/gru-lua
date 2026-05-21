@@ -26,3 +26,9 @@ func TableResult(l *lua.State, kvp map[string]any) int {
 	PushTable(l, kvp)
 	return 1
 }
+
+// function(): table<string>
+func StringTableArrayResult(l *lua.State, data []string) int {
+	PushStringArrayTable(l, &data)
+	return 1
+}
