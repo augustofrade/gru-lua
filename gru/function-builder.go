@@ -51,6 +51,11 @@ func (f *GruFunctionBuilder) ReturnsNumber() *GruFunctionBuilder {
 	return f
 }
 
+func (f *GruFunctionBuilder) ReturnsError() *GruFunctionBuilder {
+	f.returnTypes = append(f.returnTypes, "GruError")
+	return f
+}
+
 func (f *GruFunctionBuilder) ReturnsStringWithError() *GruFunctionBuilder {
 	f.returnTypes = append(f.returnTypes, "string", "GruError")
 	return f

@@ -11,6 +11,14 @@ func ErrorResult(l *lua.State, message string) int {
 	return 2
 }
 
+// function(): error
+//
+// Same as using StringResult() but clearer about intent
+func SimpleErrorResult(l *lua.State, message string) int {
+	l.PushString(message)
+	return 1
+}
+
 // function(): string
 func StringResult(l *lua.State, value string) int {
 	l.PushString(value)
