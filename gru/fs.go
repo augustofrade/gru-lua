@@ -1,6 +1,7 @@
 package gru
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -21,6 +22,13 @@ func NewFsModule() GruModule {
 		StringProp("name", "Name of the directory entry.").
 		BooleanProp("is_dir", "Whether the entry is a directory").
 		StringProp("parent_path", "Absolute parent path of the directory entry")
+
+	module.HasCustomType("GruFileInfo", "Information about a file or directory").
+		StringProp("name", "Name of the file or directory.").
+		StringProp("fullpath", "Fullpath of the file or directory").
+		BooleanProp("is_dir", "Whether the entry is a directory").
+		NumberProp("last_modification_time", "UNIX date of last modification of the file or directory").
+		NumberProp("size", "Size of the file or directory")
 
 	module.FunctionBuilder("read_dir", "Reads the provided directory path and returns its contents.", fsReadDir).
 		StringParam("dir", "Dir to be read.").
@@ -59,6 +67,15 @@ func NewFsModule() GruModule {
 	module.FunctionBuilder("remove_all", "Removes path and any children it contains. If path doesn't exist, nothing happens and nil is returned.", fsRemoveAll).
 		StringParam("path", "Path of the directory.").
 		ReturnsError().
+		Register()
+	module.FunctionBuilder("exists", "Returns whether the file or directory at path exists", fsExists).
+		StringParam("path", "Path of the file or directory.").
+		ReturnsBooleanWithError().
+		Register()
+
+	module.FunctionBuilder("stat", "Returns information about the file or directory at path", fsStat).
+		StringParam("path", "Path of the file or directory.").
+		ReturnsWithError("GruFileInfo").
 		Register()
 
 	return module
@@ -182,7 +199,7 @@ func fsMkDir(l *lua.State) int {
 	}
 	dirPath, _ := l.ToString(1)
 
-	permissions := 0644
+	permissions := 0755
 	if l.Top() >= 2 {
 		// 2 parameters provided
 		if !l.IsNumber(2) {
@@ -222,4 +239,50 @@ func fsRemoveAll(l *lua.State) int {
 		return luautil.SimpleErrorResult(l, err.Error())
 	}
 	return 0
+}
+
+func fsExists(l *lua.State) int {
+	if !luautil.IsString(l, 1) {
+		return luautil.SimpleErrorResult(l, "Expected string on 'path' parameter")
+	}
+	path, _ := l.ToString(1)
+	_, err := os.Stat(filepath.Clean(path))
+	if err == nil {
+		return luautil.BoolResult(l, true)
+	}
+
+	if errors.Is(err, os.ErrNotExist) {
+		return luautil.BoolResult(l, false)
+	}
+	return luautil.ErrorResult(l, err.Error())
+
+}
+
+func fsStat(l *lua.State) int {
+	if !luautil.IsString(l, 1) {
+		return luautil.SimpleErrorResult(l, "Expected string on 'path' parameter")
+	}
+	path, _ := l.ToString(1)
+	path = filepath.Clean(path)
+	if !filepath.IsAbs(path) {
+		fullPath, err := filepath.Abs(path)
+		if err != nil {
+			return luautil.SimpleErrorResult(l, err.Error())
+		}
+		path = fullPath
+	}
+	stat, err := os.Stat(path)
+	if err != nil {
+		return luautil.SimpleErrorResult(l, err.Error())
+	}
+
+	fileInfo := make(map[string]any)
+
+	fileInfo["name"] = stat.Name()
+	fileInfo["fullpath"] = path
+	fileInfo["is_dir"] = stat.IsDir()
+	fileInfo["last_modification_time"] = stat.ModTime().Unix()
+	fileInfo["size"] = stat.Size()
+
+	return luautil.TableResult(l, fileInfo)
 }
