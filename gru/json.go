@@ -4,56 +4,23 @@ import (
 	"encoding/json"
 
 	"github.com/Shopify/go-lua"
+	"github.com/augustofrade/gru-lua/gru/internal/luautil"
 )
 
 func NewJsonModule() GruModule {
 	module := NewModule("json", "JSON methods")
-	module.FunctionBuilder("stringify", "Converts a table", jsonStringify).
-		TableParam("json", "The json to be stringified").
+	module.FunctionBuilder("stringify", "Converts a table to JSON. Properties with 'nil' string values are converted to JSON null. If an invalid table is passed, a runtime error is thrown. Use 'pcall()' if needed.", jsonStringify).
+		TableParam("table", "The table to be stringified").
+		ReturnsString().
 		Register()
 	return module
 }
 
 func jsonStringify(l *lua.State) int {
 	if !l.IsTable(1) {
-		l.PushNil()
-		l.PushString("Expected table")
-		return 2
+		return luautil.ErrorResult(l, "Expected table")
 	}
-
-	result := map[string]any{}
-
-	l.PushNil() // first key
-
-	// TODO: handle array tables
-	for l.Next(1) {
-		// -2 = key, -1 = value
-		key, _ := l.ToString(-2)
-
-		var val any
-
-		switch l.TypeOf(-1) {
-		case lua.TypeString:
-			val, _ = l.ToString(-1)
-		case lua.TypeNumber:
-			val, _ = l.ToNumber(-1)
-		case lua.TypeBoolean:
-			val = l.ToBoolean(-1)
-		case lua.TypeNil:
-			val = nil
-		}
-
-		if val == "nil" {
-			val = nil
-		}
-
-		// TODO: handle table (object/array) props
-
-		result[key] = val
-		l.Pop(1)
-	}
-
-	out, _ := json.Marshal(result)
-	l.PushString(string(out))
-	return 1
+	result := luautil.LuaTableToGo(l, 1)
+	stringfiedValue, _ := json.Marshal(result)
+	return luautil.StringResult(l, string(stringfiedValue))
 }
