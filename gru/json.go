@@ -38,5 +38,5 @@ func jsonParse(l *lua.State) int {
 	var result any
 	json.Unmarshal([]byte(str), &result)
 
-	return luautil.StringResult(l, "r")
+	return luautil.PushValue(l, result)
 }
