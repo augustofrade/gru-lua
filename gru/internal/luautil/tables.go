@@ -92,7 +92,6 @@ func LuaTableToGo(l *lua.State, index int) any {
 	if IsArrayTable(l, index) {
 		length := GetTableLength(l, index)
 		result := make([]any, 0, length)
-		fmt.Println("a")
 
 		for i := 1; i <= length; i++ {
 			l.RawGetInt(index, i)

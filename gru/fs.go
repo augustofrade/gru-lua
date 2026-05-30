@@ -2,7 +2,6 @@ package gru
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -176,7 +175,6 @@ func fsCreate(l *lua.State) int {
 		return luautil.SimpleErrorResult(l, "Expected a valid file path on 'path' parameter")
 	}
 	dirname := filepath.Dir(fPath)
-	fmt.Println(dirname)
 	err := os.MkdirAll(dirname, 0755)
 	if err != nil {
 		return luautil.SimpleErrorResult(l, "Error while creating directory of provided path: "+err.Error())
