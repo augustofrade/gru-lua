@@ -10,9 +10,9 @@ import (
 )
 
 type GruDirentry struct {
-	Name       string
-	IsDir      bool
-	ParentPath string
+	Name       string `lua:"name"`
+	IsDir      bool   `lua:"is_dir"`
+	ParentPath string `lua:"parent_path"`
 }
 
 func NewFsModule() GruModule {
@@ -107,16 +107,7 @@ func fsReadDir(l *lua.State) int {
 		})
 	}
 
-	arr := make([]any, 0, len(mapped))
-	for _, d := range mapped {
-		arr = append(arr, map[string]any{
-			"name":        d.Name,
-			"is_dir":      d.IsDir,
-			"parent_path": d.ParentPath,
-		})
-	}
-
-	luautil.PushArrayTable(l, arr)
+	luautil.PushArrayTable(l, mapped)
 	return 1
 }
 

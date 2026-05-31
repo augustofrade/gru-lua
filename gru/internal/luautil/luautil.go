@@ -2,8 +2,10 @@ package luautil
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/Shopify/go-lua"
+	"github.com/augustofrade/gru-lua/gru/internal/luamapper"
 )
 
 // Converts a Lua value at the specified index of the lua stack.
@@ -49,6 +51,10 @@ func PushValue(l *lua.State, value any) int {
 	case map[string]any:
 		PushTable(l, v)
 	default:
+		if reflect.TypeOf(v).Kind() == reflect.Struct {
+			mapped := luamapper.MapStructToSlice(v)
+			return PushValue(l, *mapped)
+		}
 		l.PushString(fmt.Sprint(v))
 	}
 	return 1
@@ -66,7 +72,7 @@ func PushTable(l *lua.State, kvp map[string]any) int {
 }
 
 // Pushes an array table onto the lua stack.
-func PushArrayTable(l *lua.State, tbl []any) int {
+func PushArrayTable[T any](l *lua.State, tbl []T) int {
 	l.CreateTable(0, len(tbl))
 	for i, value := range tbl {
 		PushValue(l, value)

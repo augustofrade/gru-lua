@@ -33,7 +33,11 @@ func jsonStringify(l *lua.State) int {
 		return luautil.ErrorResult(l, "Expected table")
 	}
 	result := luautil.LuaTableToGo(l, 1)
-	stringfiedValue, _ := json.Marshal(result)
+	stringfiedValue, err := json.Marshal(result)
+	if err != nil {
+		return luautil.ErrorResult(l, err.Error())
+	}
+
 	return luautil.StringResult(l, string(stringfiedValue))
 }
 
@@ -44,7 +48,10 @@ func jsonParse(l *lua.State) int {
 	str, _ := l.ToString(1)
 
 	var result any
-	json.Unmarshal([]byte(str), &result)
+	err := json.Unmarshal([]byte(str), &result)
+	if err != nil {
+		return luautil.ErrorResult(l, err.Error())
+	}
 
 	return luautil.PushValue(l, result)
 }
