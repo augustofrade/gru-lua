@@ -9,7 +9,7 @@ func MapStructToSlice(s any) *map[string]any {
 	t := reflect.TypeOf(s)
 	val := reflect.ValueOf(s)
 
-	if t.Kind() == reflect.Ptr {
+	if t.Kind() == reflect.Pointer {
 		t = t.Elem()
 		val = val.Elem()
 	}

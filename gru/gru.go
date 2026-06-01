@@ -22,6 +22,7 @@ type GruModule struct {
 	Description string
 	Functions   []GruFunction
 	Types       []*GruModuleType
+	Alias       []*GruModuleAlias
 }
 
 type GruModuleType struct {
@@ -33,6 +34,12 @@ type GruModuleType struct {
 type GruModuleTypeProperty struct {
 	Description string
 	Type        string
+}
+
+type GruModuleAlias struct {
+	Name        string
+	Description string
+	To          string
 }
 
 // A callable function through gru.<module-name>.<function-name>
@@ -95,6 +102,8 @@ func InitDefaultModules() {
 	RegisteredModules = append(RegisteredModules, NewZipModule())
 	RegisteredModules = append(RegisteredModules, NewEnvModule())
 	RegisteredModules = append(RegisteredModules, NewFsModule())
+	RegisteredModules = append(RegisteredModules, NewHttpModule())
+
 }
 
 // Registers all default Gru modules into Lua tables accessed through the default "gru" global table.
@@ -148,6 +157,16 @@ func (module *GruModule) FunctionBuilder(name string, description string, functi
 		parameters:  make([]GruFunctionParameter, 0),
 		module:      module,
 	}
+}
+
+func (module *GruModule) HasCustomAlias(name string, description string, aliasTo string) *GruModuleAlias {
+	newAlias := GruModuleAlias{
+		Name:        name,
+		Description: description,
+		To:          aliasTo,
+	}
+	module.Alias = append(module.Alias, &newAlias)
+	return &newAlias
 }
 
 func (module *GruModule) HasCustomType(name string, description string) *GruModuleType {
