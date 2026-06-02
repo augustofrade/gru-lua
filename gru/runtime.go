@@ -2,11 +2,12 @@ package gru
 
 import (
 	"github.com/Shopify/go-lua"
+	"github.com/augustofrade/gru-lua/gru/definitions"
 	"github.com/augustofrade/gru-lua/gru/internal/luautil"
 )
 
-func NewRuntimeModule() GruModule {
-	module := NewModule("runtime", "Provides direct access to the runtime")
+func NewRuntimeModule() definitions.GruModule {
+	module := definitions.NewModule("runtime", "Provides direct access to the runtime")
 
 	module.FunctionBuilder("version", "Current version of the Gru runtime", runtimeVersion).
 		ReturnsString().

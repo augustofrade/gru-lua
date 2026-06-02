@@ -1,4 +1,4 @@
-package gru
+package definitions
 
 type GruFunctionBuilder struct {
 	name        string
@@ -7,6 +7,17 @@ type GruFunctionBuilder struct {
 	parameters  []GruFunctionParameter
 	returnTypes []string
 	module      *GruModule
+}
+
+// Creates a FunctionBuilder for GruFunctions
+func (module *GruModule) FunctionBuilder(name string, description string, function LuaInteropFunc) *GruFunctionBuilder {
+	return &GruFunctionBuilder{
+		name:        name,
+		description: description,
+		function:    function,
+		parameters:  make([]GruFunctionParameter, 0),
+		module:      module,
+	}
 }
 
 // Builds and registers the function

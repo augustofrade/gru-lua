@@ -7,14 +7,15 @@ import (
 	"net/http"
 
 	"github.com/Shopify/go-lua"
+	"github.com/augustofrade/gru-lua/gru/definitions"
 	"github.com/augustofrade/gru-lua/gru/internal/luautil"
 )
 
 // TODO: use this alias
 type GruHttpHeaders map[string]string
 
-func NewHttpModule() GruModule {
-	module := NewModule("http", "HTTP operations")
+func NewHttpModule() definitions.GruModule {
+	module := definitions.NewModule("http", "HTTP operations")
 
 	module.HasCustomAlias("GruHttpHeaders", "HTTP headers of a response or request.", "table<string, string>")
 

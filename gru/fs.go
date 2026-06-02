@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/Shopify/go-lua"
+	"github.com/augustofrade/gru-lua/gru/definitions"
 	"github.com/augustofrade/gru-lua/gru/internal/luautil"
 )
 
@@ -15,8 +16,8 @@ type GruDirentry struct {
 	ParentPath string `lua:"parent_path"`
 }
 
-func NewFsModule() GruModule {
-	module := NewModule("fs", "File System operations.")
+func NewFsModule() definitions.GruModule {
+	module := definitions.NewModule("fs", "File System operations.")
 	module.HasCustomType("GruDirentry", "").
 		StringProp("name", "Name of the directory entry.").
 		BooleanProp("is_dir", "Whether the entry is a directory").

@@ -5,11 +5,12 @@ import (
 	"strings"
 
 	"github.com/Shopify/go-lua"
+	"github.com/augustofrade/gru-lua/gru/definitions"
 	"github.com/augustofrade/gru-lua/gru/internal/luautil"
 )
 
-func NewPathModule() GruModule {
-	module := NewModule("path", "System Path operations")
+func NewPathModule() definitions.GruModule {
+	module := definitions.NewModule("path", "System Path operations")
 	module.FunctionBuilder("basename", "Returns the last portion of the path.", pathBasename).
 		StringParam("path", "").
 		ReturnsStringWithError().

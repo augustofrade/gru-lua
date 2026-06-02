@@ -1,6 +1,9 @@
 package gru
 
-import "github.com/Shopify/go-lua"
+import (
+	"github.com/Shopify/go-lua"
+	"github.com/augustofrade/gru-lua/gru/definitions"
+)
 
 var colorCodes = map[string]string{
 	"black":        "30",
@@ -21,8 +24,8 @@ var colorCodes = map[string]string{
 	"lightWhite":   "97",
 }
 
-func NewColorsModule() GruModule {
-	module := NewModule("colors", "Write colored text int the terminal")
+func NewColorsModule() definitions.GruModule {
+	module := definitions.NewModule("colors", "Write colored text int the terminal")
 	module.FunctionBuilder("red", "Red color", redColor).
 		StringParam("text", "Text to be colored").
 		Register()

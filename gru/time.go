@@ -4,11 +4,12 @@ import (
 	"time"
 
 	"github.com/Shopify/go-lua"
+	"github.com/augustofrade/gru-lua/gru/definitions"
 	"github.com/augustofrade/gru-lua/gru/internal/luautil"
 )
 
-func NewTimeModule() GruModule {
-	module := NewModule("time", "Time related operations")
+func NewTimeModule() definitions.GruModule {
+	module := definitions.NewModule("time", "Time related operations")
 	module.FunctionBuilder("sleep", "Sleeps for <duration> seconds", timeSleep).
 		NumberParam("seconds", "Duration in seconds").
 		Register()

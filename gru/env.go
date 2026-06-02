@@ -4,11 +4,12 @@ import (
 	"os"
 
 	"github.com/Shopify/go-lua"
+	"github.com/augustofrade/gru-lua/gru/definitions"
 	"github.com/augustofrade/gru-lua/gru/internal/luautil"
 )
 
-func NewEnvModule() GruModule {
-	module := NewModule("env", "Environment operations.")
+func NewEnvModule() definitions.GruModule {
+	module := definitions.NewModule("env", "Environment operations.")
 	module.FunctionBuilder("set", "Sets an environment variable. Returns an error string", envSet).
 		StringParam("key", "Key of the environment variable.").
 		StringParam("value", "value to be assigned on the key of the environment variable.").

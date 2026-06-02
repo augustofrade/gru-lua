@@ -6,11 +6,12 @@ import (
 	"path/filepath"
 
 	"github.com/Shopify/go-lua"
+	"github.com/augustofrade/gru-lua/gru/definitions"
 	"github.com/augustofrade/gru-lua/gru/internal/luautil"
 )
 
-func NewJsonModule() GruModule {
-	module := NewModule("json", "JSON methods")
+func NewJsonModule() definitions.GruModule {
+	module := definitions.NewModule("json", "JSON methods")
 	module.FunctionBuilder("stringify", "Converts a table to JSON. Properties with 'nil' string values are converted to JSON null. If an invalid table is passed, a runtime error is thrown. Use 'pcall()' if needed.", jsonStringify).
 		TableParam("table", "The table to be stringified").
 		ReturnsString().

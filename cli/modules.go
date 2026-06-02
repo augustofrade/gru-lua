@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/augustofrade/gru-lua/gru"
+	"github.com/augustofrade/gru-lua/gru/definitions"
 )
 
 func modulesCommand(maxModuleSize int, specifiedModule string) {
@@ -15,7 +16,7 @@ func modulesCommand(maxModuleSize int, specifiedModule string) {
 		return
 	}
 
-	var module *gru.GruModule
+	var module *definitions.GruModule
 	for _, m := range gru.RegisteredModules {
 		if m.Name == specifiedModule {
 			module = &m
@@ -44,7 +45,7 @@ func printAllModulesInfo(maxModuleSize int) {
 	fmt.Println("Use 'gru modules <module-name>' to view all functions of the specified module")
 }
 
-func printModuleInfo(module gru.GruModule, maxModuleSize int) {
+func printModuleInfo(module definitions.GruModule, maxModuleSize int) {
 	functionAmount := len(module.Functions)
 
 	builder := strings.Builder{}

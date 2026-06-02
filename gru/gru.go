@@ -4,58 +4,16 @@ import (
 	"fmt"
 
 	"github.com/Shopify/go-lua"
+	"github.com/augustofrade/gru-lua/gru/definitions"
 )
 
 const runtimeCurrentVersion string = "0.0.2"
 
 var _l *lua.State
 
-var RegisteredModules = make([]GruModule, 0)
+var RegisteredModules = make([]definitions.GruModule, 0)
 
 const errorCallbackRegistryKey = "gru.runtime.on_error"
-
-type LuaInteropFunc func(l *lua.State) int
-
-// A module that is accessible in Lua with the default gru table: gru.<module-name>
-type GruModule struct {
-	Name        string
-	Description string
-	Functions   []GruFunction
-	Types       []*GruModuleType
-	Alias       []*GruModuleAlias
-}
-
-type GruModuleType struct {
-	Name        string
-	Description string
-	Properties  map[string]GruModuleTypeProperty
-}
-
-type GruModuleTypeProperty struct {
-	Description string
-	Type        string
-}
-
-type GruModuleAlias struct {
-	Name        string
-	Description string
-	To          string
-}
-
-// A callable function through gru.<module-name>.<function-name>
-type GruFunction struct {
-	Name           string
-	Description    string
-	Parameters     []GruFunctionParameter
-	Implementation LuaInteropFunc
-	ReturnTypes    []string
-}
-
-type GruFunctionParameter struct {
-	Name        string
-	Description string
-	Type        string
-}
 
 // Inits the VM with all default Lua and Gru libraries
 func initGru() {
@@ -119,7 +77,7 @@ func RegisterDefaultModules() {
 }
 
 // Registers a new Gru module alongside all its functions as Lua tables and functions
-func RegisterGruModule(module GruModule) {
+func RegisterGruModule(module definitions.GruModule) {
 	_l.NewTable()
 	for _, function := range module.Functions {
 		_l.PushGoFunction(lua.Function(function.Implementation))
@@ -132,69 +90,4 @@ func RegisterGruModule(module GruModule) {
 	// therefore the top of the stack is the module Lua table
 	// gruTable[module.Name] = moduleTable
 	_l.SetField(-2, module.Name)
-}
-
-// Default GruModule factory
-func NewModule(name string, description string) GruModule {
-	return GruModule{
-		Name:        name,
-		Description: description,
-		Functions:   make([]GruFunction, 0),
-	}
-}
-
-// Registers a built GruFunction in the Lua GruModule
-func (module *GruModule) RegisterGruFunction(function GruFunction) {
-	module.Functions = append(module.Functions, function)
-}
-
-// Creates a FunctionBuilder for GruFunctions
-func (module *GruModule) FunctionBuilder(name string, description string, function LuaInteropFunc) *GruFunctionBuilder {
-	return &GruFunctionBuilder{
-		name:        name,
-		description: description,
-		function:    function,
-		parameters:  make([]GruFunctionParameter, 0),
-		module:      module,
-	}
-}
-
-func (module *GruModule) HasCustomAlias(name string, description string, aliasTo string) *GruModuleAlias {
-	newAlias := GruModuleAlias{
-		Name:        name,
-		Description: description,
-		To:          aliasTo,
-	}
-	module.Alias = append(module.Alias, &newAlias)
-	return &newAlias
-}
-
-func (module *GruModule) HasCustomType(name string, description string) *GruModuleType {
-	newType := GruModuleType{
-		Name:        name,
-		Description: description,
-		Properties:  make(map[string]GruModuleTypeProperty),
-	}
-	module.Types = append(module.Types, &newType)
-	return &newType
-}
-
-func (cType *GruModuleType) Prop(name string, propType string, description string) *GruModuleType {
-	cType.Properties[name] = GruModuleTypeProperty{
-		Description: description,
-		Type:        propType,
-	}
-	return cType
-}
-
-func (cType *GruModuleType) StringProp(name string, description string) *GruModuleType {
-	return cType.Prop(name, "string", description)
-}
-
-func (cType *GruModuleType) NumberProp(name string, description string) *GruModuleType {
-	return cType.Prop(name, "number", description)
-}
-
-func (cType *GruModuleType) BooleanProp(name string, description string) *GruModuleType {
-	return cType.Prop(name, "boolean", description)
 }
