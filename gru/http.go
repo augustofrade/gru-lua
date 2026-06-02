@@ -3,8 +3,8 @@ package gru
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
-	"strings"
 
 	"github.com/Shopify/go-lua"
 	"github.com/augustofrade/gru-lua/gru/internal/luautil"
@@ -13,11 +13,6 @@ import (
 // TODO: use this alias
 type GruHttpHeaders map[string]string
 
-type GruHttpResponse struct {
-	Headers map[string]any `lua:"headers"`
-	Body    any            `lua:"body"`
-}
-
 func NewHttpModule() GruModule {
 	module := NewModule("http", "HTTP operations")
 
@@ -25,7 +20,11 @@ func NewHttpModule() GruModule {
 
 	module.HasCustomType("GruHttpResponse", "Response of a HTTP request").
 		Prop("headers", "GruHttpHeaders", "Headers of the HTTP response").
-		Prop("body", "any", "Body of the HTTP response. JSON responses are automatically parsed into tables.")
+		Prop("body", "GruHttpBody", "Body of the HTTP response.")
+
+	module.HasCustomType("GruHttpBody", "Body of a HTTP response").
+		Prop("raw", "fun(): string, GruError", "Returns the raw body as a string.").
+		Prop("json", "fun(): any, GruError", "Parses the body as JSON and returns a table.")
 
 	module.FunctionBuilder("get", "Does a GET request at url", httpGet).
 		StringParam("url", "URL of the HTTP request").
@@ -33,6 +32,34 @@ func NewHttpModule() GruModule {
 		Register()
 
 	return module
+}
+
+// pushBodyTable pushes a Lua table onto the stack with :raw() and :json() methods,
+// capturing the raw response bytes via upvalues.
+func pushBodyTable(l *lua.State, raw []byte) {
+	l.CreateTable(0, 2)
+
+	// :raw() method
+	l.PushGoFunction(func(l *lua.State) int {
+		l.PushString(string(raw))
+		l.PushNil()
+		return 2
+	})
+	// body[raw] = function() ... end
+	l.SetField(-2, "raw")
+
+	// :json() method
+	l.PushGoFunction(func(l *lua.State) int {
+		var result any
+		if err := json.Unmarshal(raw, &result); err != nil {
+			return luautil.ErrorResult(l, fmt.Sprintf("JSON parse error: %s", err.Error()))
+		}
+		luautil.PushValue(l, result)
+		l.PushNil()
+		return 2
+	})
+	// body[json] = function() ... end
+	l.SetField(-2, "json")
 }
 
 func httpGet(l *lua.State) int {
@@ -55,25 +82,30 @@ func httpGet(l *lua.State) int {
 	}
 	defer resp.Body.Close()
 
-	contentType := resp.Header.Get("Content-Type")
-
-	gruResp := GruHttpResponse{
-		Headers: make(map[string]any),
+	raw, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return luautil.ErrorResult(l, fmt.Sprintf("HTTP read error: %s", err.Error()))
 	}
 
-	for key, values := range resp.Header {
-		gruResp.Headers[key] = values[0]
+	// Build the response table: { headers = {...}, body = { string=fn, json=fn } }
+	l.CreateTable(0, 2)
+	// headers
+	luautil.PushTable(l, getHeaders(resp.Header))
+	l.SetField(-2, "headers")
+
+	// body
+	pushBodyTable(l, raw)
+	l.SetField(-2, "body")
+
+	l.PushNil()
+	return 2
+}
+
+func getHeaders(httpHeader http.Header) map[string]any {
+	headers := make(map[string]any, len(httpHeader))
+	for key, values := range httpHeader {
+		headers[key] = values[0]
 	}
-	if strings.HasPrefix(contentType, "application/json") {
-		var respBody any
-		if err := json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-			return luautil.ErrorResult(l, fmt.Sprintf("HTTP response parsing error: %s", err.Error()))
-		}
+	return headers
 
-		gruResp.Body = respBody
-
-		return luautil.PushValue(l, gruResp)
-	}
-
-	return luautil.PushValue(l, gruResp)
 }
