@@ -34,8 +34,7 @@ func NewHttpModule() GruModule {
 	return module
 }
 
-// pushBodyTable pushes a Lua table onto the stack with :raw() and :json() methods,
-// capturing the raw response bytes via upvalues.
+// pushes a Lua table onto the stack with :raw() and :json() methods
 func pushBodyTable(l *lua.State, raw []byte) {
 	l.CreateTable(0, 2)
 
