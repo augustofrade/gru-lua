@@ -9,19 +9,8 @@ type GruModule struct {
 	Name        string
 	Description string
 	Functions   []GruFunction
-	Types       []*GruModuleType
+	Types       []*GruModuleCustomType
 	Alias       []*GruModuleAlias
-}
-
-type GruModuleType struct {
-	Name        string
-	Description string
-	Properties  map[string]GruModuleTypeProperty
-}
-
-type GruModuleTypeProperty struct {
-	Description string
-	Type        string
 }
 
 // A callable function through gru.<module-name>.<function-name>
@@ -39,17 +28,26 @@ type GruFunctionParameter struct {
 	Type        string
 }
 
-type GruModuleTypeMethod struct {
+type GruModuleAlias struct {
+	Name        string
+	Description string
+	To          string
+}
+
+type GruModuleCustomType struct {
+	Name        string
+	Description string
+	Properties  map[string]GruModuleCustomTypeProperty
+	Methods     map[string]*GruModuleCustomTypeMethod
+}
+
+type GruModuleCustomTypeMethod struct {
 	Description string
 	Parameters  []GruFunctionParameter
 	ReturnTypes []string
 }
 
-type GruModuleTypeMethodParam struct {
-}
-
-type GruModuleAlias struct {
-	Name        string
+type GruModuleCustomTypeProperty struct {
 	Description string
-	To          string
+	Type        string
 }

@@ -22,7 +22,7 @@ func (module *GruModule) FunctionBuilder(name string, description string, functi
 
 // Builds and registers the function
 func (f *GruFunctionBuilder) Register() {
-	f.module.RegisterGruFunction(
+	f.module.registerGruFunction(
 		GruFunction{
 			Name:           f.name,
 			Description:    f.description,

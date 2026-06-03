@@ -10,7 +10,7 @@ func NewModule(name string, description string) GruModule {
 }
 
 // Registers a built GruFunction in the Lua GruModule
-func (module *GruModule) RegisterGruFunction(function GruFunction) {
+func (module *GruModule) registerGruFunction(function GruFunction) {
 	module.Functions = append(module.Functions, function)
 }
 
@@ -24,40 +24,42 @@ func (module *GruModule) HasCustomAlias(name string, description string, aliasTo
 	return &newAlias
 }
 
-func (module *GruModule) HasCustomType(name string, description string) *GruModuleType {
-	newType := GruModuleType{
+func (module *GruModule) HasCustomType(name string, description string) *GruModuleCustomType {
+	newType := GruModuleCustomType{
 		Name:        name,
 		Description: description,
-		Properties:  make(map[string]GruModuleTypeProperty),
+		Properties:  make(map[string]GruModuleCustomTypeProperty),
 	}
 	module.Types = append(module.Types, &newType)
 	return &newType
 }
 
-func (cType *GruModuleType) Prop(name string, propType string, description string) *GruModuleType {
-	cType.Properties[name] = GruModuleTypeProperty{
+func (cType *GruModuleCustomType) Prop(name string, propType string, description string) *GruModuleCustomType {
+	cType.Properties[name] = GruModuleCustomTypeProperty{
 		Description: description,
 		Type:        propType,
 	}
 	return cType
 }
 
-func (cType *GruModuleType) StringProp(name string, description string) *GruModuleType {
+func (cType *GruModuleCustomType) StringProp(name string, description string) *GruModuleCustomType {
 	return cType.Prop(name, "string", description)
 }
 
-func (cType *GruModuleType) NumberProp(name string, description string) *GruModuleType {
+func (cType *GruModuleCustomType) NumberProp(name string, description string) *GruModuleCustomType {
 	return cType.Prop(name, "number", description)
 }
 
-func (cType *GruModuleType) BooleanProp(name string, description string) *GruModuleType {
+func (cType *GruModuleCustomType) BooleanProp(name string, description string) *GruModuleCustomType {
 	return cType.Prop(name, "boolean", description)
 }
 
-func (cType *GruModuleType) Method(name string, description string, returns ...string) *GruModuleType {
-	cType.Properties[name] = GruModuleTypeProperty{
+func (cType *GruModuleCustomType) Method(name string, description string) *GruModuleCustomTypeMethod {
+	cMethod := GruModuleCustomTypeMethod{
 		Description: description,
-		Type:        "fun():",
 	}
-	return cType
+
+	cType.Methods[name] = &cMethod
+
+	return &cMethod
 }
