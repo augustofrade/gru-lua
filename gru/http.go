@@ -46,6 +46,8 @@ func NewHttpModule() definitions.GruModule {
 	registerModuleHttpMethod(&module, "put", httpPut)
 	registerModuleHttpMethod(&module, "patch", httpPatch)
 	registerModuleHttpMethod(&module, "delete", httpDelete)
+	registerModuleHttpMethod(&module, "head", httpHead)
+	registerModuleHttpMethod(&module, "options", httpOptions)
 
 	return module
 }
@@ -85,6 +87,18 @@ func httpDelete(l *lua.State) int {
 	})
 }
 
+func httpHead(l *lua.State) int {
+	return handleRequest(l, http.MethodHead, func(gruReq *GruHttpRequest) error {
+		return gruReq.SetRequestBody()
+	})
+}
+
+func httpOptions(l *lua.State) int {
+	return handleRequest(l, http.MethodOptions, func(gruReq *GruHttpRequest) error {
+		return gruReq.SetRequestBody()
+	})
+}
+
 func handleRequest(l *lua.State, httpMethod string, preRequestFn func(gruReq *GruHttpRequest) error) int {
 	gruReq, err := newGruHttpRequest(l, httpMethod)
 	if err != nil {
@@ -92,9 +106,12 @@ func handleRequest(l *lua.State, httpMethod string, preRequestFn func(gruReq *Gr
 	}
 
 	gruReq.SetRequestHeaders()
-	err = preRequestFn(gruReq)
-	if err != nil {
-		return httpRequestErrorResult(l, err)
+
+	if preRequestFn != nil {
+		err = preRequestFn(gruReq)
+		if err != nil {
+			return httpRequestErrorResult(l, err)
+		}
 	}
 
 	return gruReq.DoRequest()
