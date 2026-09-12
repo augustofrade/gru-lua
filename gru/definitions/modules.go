@@ -20,7 +20,7 @@ func (module *GruModule) HasCustomAlias(name string, description string, aliasTo
 		Description: description,
 		To:          aliasTo,
 	}
-	module.Alias = append(module.Alias, &newAlias)
+	module.Aliases = append(module.Aliases, &newAlias)
 	return &newAlias
 }
 

@@ -10,7 +10,7 @@ type GruModule struct {
 	Description string
 	Functions   []GruFunction
 	Types       []*GruModuleCustomType
-	Alias       []*GruModuleAlias
+	Aliases     []*GruModuleAlias
 }
 
 // A callable function through gru.<module-name>.<function-name>

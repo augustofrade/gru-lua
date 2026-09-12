@@ -61,7 +61,7 @@ func PushValue(l *lua.State, value any) int {
 }
 
 // Pushes a kvp table onto the lua stack
-func PushTable(l *lua.State, kvp map[string]any) int {
+func PushTable[T any](l *lua.State, kvp map[string]T) int {
 	l.CreateTable(0, len(kvp))
 	for key, value := range kvp {
 		PushValue(l, value)
