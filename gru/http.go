@@ -1,6 +1,7 @@
 package gru
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,9 +14,10 @@ import (
 
 type GruHttpHeaders map[string]string
 
-type GruHttpRequestOptions struct {
-	Body    []byte
-	Headers GruHttpHeaders
+type GruHttpRequest struct {
+	httpReq *http.Request
+	options map[string]any
+	l       *lua.State
 }
 
 func NewHttpModule() definitions.GruModule {
@@ -30,16 +32,23 @@ func NewHttpModule() definitions.GruModule {
 		Prop("body", "GruHttpRequestBody", "Body of the HTTP request.")
 
 	module.HasCustomType("GruHttpResponseBody", "Body of a HTTP response").
-		Prop("raw", "fun(): string, GruError", "Returns the raw body as a string.").
+		Prop("raw", "fun(): string", "Returns the raw body as a string.").
 		Prop("json", "fun(): any, GruError", "Parses the body as JSON and returns a table.")
 
 	module.HasCustomType("GruHttpResponse", "Response of a HTTP request").
 		Prop("headers", "GruHttpHeaders", "Headers of the HTTP response").
-		Prop("body", "GruHttpBody", "Body of the HTTP response.").
+		Prop("body", "GruHttpResponseBody", "Body of the HTTP response.").
 		NumberProp("status", "Status code of the HTTP response")
 
 	module.FunctionBuilder("get", "Does a GET request at url", httpGet).
 		StringParam("url", "URL of the HTTP request").
+		Param("options", "GruHttpRequestOptions?", "Settings of the request. The body property is ignored.").
+		ReturnsWithError("GruHttpResponse").
+		Register()
+
+	module.FunctionBuilder("post", "Does a POST request at url", httpPost).
+		StringParam("url", "URL of the HTTP request").
+		Param("options", "GruHttpRequestOptions?", "Settings of the request.").
 		ReturnsWithError("GruHttpResponse").
 		Register()
 
@@ -47,16 +56,30 @@ func NewHttpModule() definitions.GruModule {
 }
 
 func httpGet(l *lua.State) int {
-	req, err := newRequest(l, http.MethodGet)
+	gruReq, err := newGruHttpRequest(l, http.MethodGet)
 	if err != nil {
-		return httpErrorResult(l, err)
+		return httpRequestErrorResult(l, err)
 	}
-	setRequestHeaders(l, req)
+	gruReq.SetRequestHeaders()
 
-	return doRequestAndHandleResponse(l, req)
+	return gruReq.DoRequest()
 }
 
-func newRequest(l *lua.State, httpMethod string) (*http.Request, error) {
+func httpPost(l *lua.State) int {
+	gruReq, err := newGruHttpRequest(l, http.MethodGet)
+	if err != nil {
+		return httpRequestErrorResult(l, err)
+	}
+	gruReq.SetRequestHeaders()
+	err = gruReq.SetRequestBody()
+	if err != nil {
+		return httpRequestErrorResult(l, err)
+	}
+
+	return gruReq.DoRequest()
+}
+
+func newGruHttpRequest(l *lua.State, httpMethod string) (*GruHttpRequest, error) {
 	if !luautil.IsString(l, 1) {
 		return nil, fmt.Errorf("Expected string for 'url' parameter.")
 	}
@@ -68,38 +91,53 @@ func newRequest(l *lua.State, httpMethod string) (*http.Request, error) {
 
 	url, _ := l.ToString(1)
 
-	req, err := http.NewRequest(httpMethod, url, nil)
+	httpReq, err := http.NewRequest(httpMethod, url, nil)
 
-	return req, err
+	return &GruHttpRequest{
+			httpReq: httpReq,
+			options: luautil.LuaTableToGo(l, 2).(map[string]any),
+			l:       l},
+		err
 }
 
 func validateRequestOptionsTable(l *lua.State) error {
 	if l.IsNil(2) == false && l.IsTable(2) && luautil.IsArrayTable(l, 2) {
-		return fmt.Errorf("Expected keyed table for 'options' parameter.")
+		return fmt.Errorf("Expected GruHttpRequestOptions for 'options' parameter.")
 	}
 	return nil
 }
 
-func setRequestHeaders(l *lua.State, req *http.Request) {
-	options, _ := luautil.LuaTableToGo(l, 2).(map[string]any)
-
-	headers, _ := options["headers"].(map[string]any)
+func (gruReq *GruHttpRequest) SetRequestHeaders() {
+	headers, _ := gruReq.options["headers"].(map[string]any)
 	for k, v := range headers {
-		req.Header.Add(k, v.(string))
+		gruReq.httpReq.Header.Add(k, v.(string))
 	}
 }
 
-func doRequestAndHandleResponse(l *lua.State, req *http.Request) int {
-	client := &http.Client{}
+func (gruReq *GruHttpRequest) SetRequestBody() error {
+	body, _ := gruReq.options["body"].(map[string]any)
 
-	resp, err := client.Do(req)
+	jsonBytes, err := json.Marshal(body)
 	if err != nil {
-		return luautil.ErrorResult(l, fmt.Sprintf("HTTP request error: %s", err.Error()))
+		return err
 	}
 
-	err = buildResponseTable(l, resp)
+	gruReq.httpReq.Body = io.NopCloser(bytes.NewReader(jsonBytes))
+	gruReq.httpReq.ContentLength = int64(len(jsonBytes))
+	return err
+}
+
+func (gruReq *GruHttpRequest) DoRequest() int {
+	client := &http.Client{}
+
+	resp, err := client.Do(gruReq.httpReq)
 	if err != nil {
-		return luautil.ErrorResult(l, fmt.Sprintf("HTTP read error: %s", err.Error()))
+		return httpRequestErrorResult(gruReq.l, err)
+	}
+
+	err = buildResponseTable(gruReq.l, resp)
+	if err != nil {
+		return httpResponseErrorResult(gruReq.l, err)
 	}
 	return 2
 }
@@ -156,8 +194,7 @@ func pushResponseBodyTable(l *lua.State, raw []byte) {
 	// :raw() method
 	l.PushGoFunction(func(l *lua.State) int {
 		l.PushString(string(raw))
-		l.PushNil()
-		return 2
+		return 1
 	})
 	// body[raw] = function() ... end
 	l.SetField(-2, "raw")
@@ -176,6 +213,10 @@ func pushResponseBodyTable(l *lua.State, raw []byte) {
 	l.SetField(-2, "json")
 }
 
-func httpErrorResult(l *lua.State, err error) int {
+func httpRequestErrorResult(l *lua.State, err error) int {
 	return luautil.ErrorResult(l, fmt.Sprintf("HTTP Request error: %s", err.Error()))
+}
+
+func httpResponseErrorResult(l *lua.State, err error) int {
+	return luautil.ErrorResult(l, fmt.Sprintf("HTTP Response error: %s", err.Error()))
 }
