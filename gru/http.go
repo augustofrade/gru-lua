@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/Shopify/go-lua"
 	"github.com/augustofrade/gru-lua/gru/definitions"
@@ -28,8 +29,8 @@ func NewHttpModule() definitions.GruModule {
 	module.HasCustomAlias("GruHttpRequestBody", "Body of a HTTP request", "table<string, unknown>")
 
 	module.HasCustomType("GruHttpRequestOptions", "Options for a HTTP request").
-		Prop("headers", "GruHttpHeaders", "Headers of the HTTP request").
-		Prop("body", "GruHttpRequestBody", "Body of the HTTP request.")
+		Prop("headers", "GruHttpHeaders?", "Headers of the HTTP request").
+		Prop("body", "GruHttpRequestBody?", "Body of the HTTP request.")
 
 	module.HasCustomType("GruHttpResponseBody", "Body of a HTTP response").
 		Prop("raw", "fun(): string", "Returns the raw body as a string.").
@@ -40,38 +41,58 @@ func NewHttpModule() definitions.GruModule {
 		Prop("body", "GruHttpResponseBody", "Body of the HTTP response.").
 		NumberProp("status", "Status code of the HTTP response")
 
-	module.FunctionBuilder("get", "Does a GET request at url", httpGet).
-		StringParam("url", "URL of the HTTP request").
-		Param("options", "GruHttpRequestOptions?", "Settings of the request. The body property is ignored.").
-		ReturnsWithError("GruHttpResponse").
-		Register()
-
-	module.FunctionBuilder("post", "Does a POST request at url", httpPost).
-		StringParam("url", "URL of the HTTP request").
-		Param("options", "GruHttpRequestOptions?", "Settings of the request.").
-		ReturnsWithError("GruHttpResponse").
-		Register()
+	registerModuleHttpMethod(&module, "get", httpGet)
+	registerModuleHttpMethod(&module, "post", httpPost)
+	registerModuleHttpMethod(&module, "put", httpPut)
+	registerModuleHttpMethod(&module, "patch", httpPatch)
+	registerModuleHttpMethod(&module, "delete", httpDelete)
 
 	return module
 }
 
-func httpGet(l *lua.State) int {
-	gruReq, err := newGruHttpRequest(l, http.MethodGet)
-	if err != nil {
-		return httpRequestErrorResult(l, err)
-	}
-	gruReq.SetRequestHeaders()
+func registerModuleHttpMethod(module *definitions.GruModule, httpMethod string, fn func(l *lua.State) int) {
+	module.FunctionBuilder(strings.ToLower(httpMethod), fmt.Sprintf("Does a %s request at url", strings.ToUpper(httpMethod)), fn).
+		StringParam("url", "URL of the HTTP request").
+		Param("options", "GruHttpRequestOptions?", "Settings of the request.").
+		ReturnsWithError("GruHttpResponse").
+		Register()
+}
 
-	return gruReq.DoRequest()
+func httpGet(l *lua.State) int {
+	return handleRequest(l, http.MethodGet, nil)
 }
 
 func httpPost(l *lua.State) int {
-	gruReq, err := newGruHttpRequest(l, http.MethodGet)
+	return handleRequest(l, http.MethodPost, func(gruReq *GruHttpRequest) error {
+		return gruReq.SetRequestBody()
+	})
+}
+
+func httpPut(l *lua.State) int {
+	return handleRequest(l, http.MethodPut, func(gruReq *GruHttpRequest) error {
+		return gruReq.SetRequestBody()
+	})
+}
+func httpPatch(l *lua.State) int {
+	return handleRequest(l, http.MethodPatch, func(gruReq *GruHttpRequest) error {
+		return gruReq.SetRequestBody()
+	})
+}
+
+func httpDelete(l *lua.State) int {
+	return handleRequest(l, http.MethodDelete, func(gruReq *GruHttpRequest) error {
+		return gruReq.SetRequestBody()
+	})
+}
+
+func handleRequest(l *lua.State, httpMethod string, preRequestFn func(gruReq *GruHttpRequest) error) int {
+	gruReq, err := newGruHttpRequest(l, httpMethod)
 	if err != nil {
 		return httpRequestErrorResult(l, err)
 	}
+
 	gruReq.SetRequestHeaders()
-	err = gruReq.SetRequestBody()
+	err = preRequestFn(gruReq)
 	if err != nil {
 		return httpRequestErrorResult(l, err)
 	}
@@ -101,9 +122,11 @@ func newGruHttpRequest(l *lua.State, httpMethod string) (*GruHttpRequest, error)
 }
 
 func validateRequestOptionsTable(l *lua.State) error {
-	if l.IsNil(2) == false && l.IsTable(2) && luautil.IsArrayTable(l, 2) {
+
+	if l.IsNoneOrNil(2) == false && l.IsTable(2) && luautil.IsArrayTable(l, 2) {
 		return fmt.Errorf("Expected GruHttpRequestOptions for 'options' parameter.")
 	}
+
 	return nil
 }
 
