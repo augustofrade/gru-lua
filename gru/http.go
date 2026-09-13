@@ -15,9 +15,14 @@ import (
 
 type GruHttpHeaders map[string]string
 
+type GruHttpRequestOptions struct {
+	Headers GruHttpHeaders
+	Body    any
+}
+
 type GruHttpRequest struct {
 	httpReq *http.Request
-	options map[string]any
+	Options *GruHttpRequestOptions
 	l       *lua.State
 }
 
@@ -26,7 +31,7 @@ func NewHttpModule() definitions.GruModule {
 
 	module.HasCustomAlias("GruHttpHeaders", "HTTP headers of a response or request.", "table<string, string>")
 
-	module.HasCustomAlias("GruHttpRequestBody", "Body of a HTTP request", "table<string, unknown>")
+	module.HasCustomAlias("GruHttpRequestBody", "Body of a HTTP request", "any")
 
 	module.HasCustomType("GruHttpRequestOptions", "Options for a HTTP request").
 		Prop("headers", "GruHttpHeaders?", "Headers of the HTTP request").
@@ -88,15 +93,11 @@ func httpDelete(l *lua.State) int {
 }
 
 func httpHead(l *lua.State) int {
-	return handleRequest(l, http.MethodHead, func(gruReq *GruHttpRequest) error {
-		return gruReq.SetRequestBody()
-	})
+	return handleRequest(l, http.MethodHead, nil)
 }
 
 func httpOptions(l *lua.State) int {
-	return handleRequest(l, http.MethodOptions, func(gruReq *GruHttpRequest) error {
-		return gruReq.SetRequestBody()
-	})
+	return handleRequest(l, http.MethodOptions, nil)
 }
 
 func handleRequest(l *lua.State, httpMethod string, preRequestFn func(gruReq *GruHttpRequest) error) int {
@@ -122,7 +123,7 @@ func newGruHttpRequest(l *lua.State, httpMethod string) (*GruHttpRequest, error)
 		return nil, fmt.Errorf("Expected string for 'url' parameter.")
 	}
 
-	err := validateRequestOptionsTable(l)
+	reqOptions, err := mapRequestOptions(l)
 	if err != nil {
 		return nil, err
 	}
@@ -133,29 +134,80 @@ func newGruHttpRequest(l *lua.State, httpMethod string) (*GruHttpRequest, error)
 
 	return &GruHttpRequest{
 			httpReq: httpReq,
-			options: luautil.LuaTableToGo(l, 2).(map[string]any),
+			Options: reqOptions,
 			l:       l},
 		err
 }
 
-func validateRequestOptionsTable(l *lua.State) error {
+func mapRequestOptions(l *lua.State) (*GruHttpRequestOptions, error) {
+	argIndex := 2
 
-	if l.IsNoneOrNil(2) == false && l.IsTable(2) && luautil.IsArrayTable(l, 2) {
-		return fmt.Errorf("Expected GruHttpRequestOptions for 'options' parameter.")
+	opt := GruHttpRequestOptions{
+		Headers: GruHttpHeaders{},
 	}
 
-	return nil
+	if l.IsNoneOrNil(argIndex) == true {
+		return &opt, nil
+	}
+
+	// Only keyed tables allowed
+	if !l.IsTable(argIndex) || luautil.IsArrayTable(l, argIndex) {
+		return nil, fmt.Errorf("Expected GruHttpRequestOptions for 'options' parameter, found: %v", l.TypeOf(argIndex))
+	}
+
+	luaOptions := luautil.LuaTableToGo(l, argIndex).(map[string]any)
+
+	if luaOptions["body"] != nil {
+		opt.Body = luaOptions["body"]
+	}
+
+	if luaOptions["headers"] != nil {
+		headers, err := validateRequestHeaders(luaOptions["headers"])
+		if err != nil {
+			return nil, err
+		}
+		opt.Headers = headers
+	}
+
+	return &opt, nil
+}
+
+func validateRequestHeaders(h any) (GruHttpHeaders, error) {
+	if h == nil {
+		return GruHttpHeaders{}, nil
+	}
+
+	rawHeaders, ok := h.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("Expected 'headers' property of GruHttpRequestOptions to be of type GruHttpHeaders")
+	}
+
+	headers := make(GruHttpHeaders, len(rawHeaders))
+
+	for k, v := range rawHeaders {
+		strValue, ok := v.(string)
+		if !ok {
+			return nil, fmt.Errorf("Expected value of '%s' key of GruHttpHeaders to be of type string", k)
+		}
+		headers[k] = strValue
+	}
+
+	return headers, nil
 }
 
 func (gruReq *GruHttpRequest) SetRequestHeaders() {
-	headers, _ := gruReq.options["headers"].(map[string]any)
+	headers := gruReq.Options.Headers
+
 	for k, v := range headers {
-		gruReq.httpReq.Header.Add(k, v.(string))
+		gruReq.httpReq.Header.Add(k, v)
 	}
 }
 
 func (gruReq *GruHttpRequest) SetRequestBody() error {
-	body, _ := gruReq.options["body"].(map[string]any)
+	body := gruReq.Options.Body
+	if body == nil {
+		return nil
+	}
 
 	jsonBytes, err := json.Marshal(body)
 	if err != nil {
@@ -241,6 +293,11 @@ func pushResponseBodyTable(l *lua.State, raw []byte) {
 
 	// :json() method
 	l.PushGoFunction(func(l *lua.State) int {
+		if len(raw) == 0 {
+			l.PushNil()
+			l.PushNil()
+			return 2
+		}
 		var result any
 		if err := json.Unmarshal(raw, &result); err != nil {
 			return luautil.ErrorResult(l, fmt.Sprintf("JSON parse error: %s", err.Error()))
