@@ -69,7 +69,7 @@ func IsArrayTable(l *lua.State, index int) bool {
 	l.PushNil()
 	for l.Next(absIndex) {
 		if l.TypeOf(-2) != lua.TypeNumber {
-			// key is not is a number
+			// key is not a number
 			l.Pop(1)
 			return false
 		}
@@ -85,6 +85,35 @@ func IsArrayTable(l *lua.State, index int) bool {
 	}
 
 	return count == length
+}
+
+// TODO: Not used
+func IsKeyedTable(l *lua.State, index int, expectedType lua.Type) bool {
+	length := GetTableLength(l, index)
+	if length == 0 {
+		return false
+	}
+
+	// Prevents errors from relative indexes (ex: -1) with the following required PushNil()
+	absIndex := l.AbsIndex(index)
+	l.PushNil()
+	for l.Next(absIndex) {
+		if l.TypeOf(-2) != lua.TypeString {
+			// key is not a string
+			l.Pop(1)
+			return false
+		}
+
+		if expectedType != 0 && l.TypeOf(-1) != expectedType {
+			// value is not of the expected optional passed type
+			l.Pop(1)
+			return false
+		}
+
+		l.Pop(1)
+	}
+
+	return true
 }
 
 // Returns table at index either as []string for "arrays" or map[string]any for keyed tables

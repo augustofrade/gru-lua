@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
 	"strings"
 
@@ -63,6 +64,46 @@ func registerModuleHttpMethod(module *definitions.GruModule, httpMethod string, 
 		Param("options", "GruHttpRequestOptions?", "Settings of the request.").
 		ReturnsWithError("GruHttpResponse").
 		Register()
+}
+
+func (options *GruHttpRequestOptions) GetContentType() (string, bool) {
+	for key, val := range options.Headers {
+		if strings.EqualFold(key, "Content-Type") {
+			mediaType, _, err := mime.ParseMediaType(val)
+			if err != nil {
+				return strings.ToLower(strings.TrimSpace(val)), true
+			}
+
+			return strings.ToLower(mediaType), true
+		}
+	}
+	return "", false
+}
+
+func isJSONContentType(contentType string) bool {
+	return contentType == "application/json" || strings.HasSuffix(contentType, "+json")
+}
+
+func mapRequestBody(contentType string, body any) ([]byte, error) {
+	if isJSONContentType(contentType) {
+		return json.Marshal(body)
+	}
+
+	if strings.HasPrefix(contentType, "text/") {
+		textBody, ok := body.(string)
+		if !ok {
+			return nil, fmt.Errorf("Expected string body for Content-Type '%s'", contentType)
+		}
+
+		return []byte(textBody), nil
+	}
+
+	rawBody, ok := body.(string)
+	if ok {
+		return []byte(rawBody), nil
+	}
+
+	return nil, fmt.Errorf("Unsupported body type for Content-Type '%s'", contentType)
 }
 
 func httpGet(l *lua.State) int {
@@ -205,17 +246,23 @@ func (gruReq *GruHttpRequest) SetRequestHeaders() {
 
 func (gruReq *GruHttpRequest) SetRequestBody() error {
 	body := gruReq.Options.Body
+
 	if body == nil {
 		return nil
 	}
 
-	jsonBytes, err := json.Marshal(body)
+	contentType, ok := gruReq.Options.GetContentType()
+	if !ok {
+		return fmt.Errorf("Expected 'Content-Type' header when body is provided")
+	}
+
+	bodyBytes, err := mapRequestBody(contentType, body)
 	if err != nil {
 		return err
 	}
 
-	gruReq.httpReq.Body = io.NopCloser(bytes.NewReader(jsonBytes))
-	gruReq.httpReq.ContentLength = int64(len(jsonBytes))
+	gruReq.httpReq.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+	gruReq.httpReq.ContentLength = int64(len(bodyBytes))
 	return err
 }
 
