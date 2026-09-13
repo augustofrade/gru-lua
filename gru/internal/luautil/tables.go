@@ -116,6 +116,25 @@ func IsKeyedTable(l *lua.State, index int, expectedType lua.Type) bool {
 	return true
 }
 
+func IsTableEmpty(l *lua.State, index int) bool {
+	absIndex := l.AbsIndex(index)
+	l.PushNil()
+	if l.Next(absIndex) {
+		l.Pop(2)
+		return false
+	}
+
+	return true
+}
+
+func TableHasKey(l *lua.State, index int, key string) bool {
+	absIndex := l.AbsIndex(index)
+	l.Field(absIndex, key)
+	hasKey := !l.IsNil(-1)
+	l.Pop(1)
+	return hasKey
+}
+
 // Returns table at index either as []string for "arrays" or map[string]any for keyed tables
 func LuaTableToGo(l *lua.State, index int) any {
 	if IsArrayTable(l, index) {
