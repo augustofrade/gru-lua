@@ -52,16 +52,18 @@ func Evalute(code *string) {
 
 // Sets all default Go Gru modules into a module sice.
 func InitDefaultModules() {
-	RegisteredModules = append(RegisteredModules, NewColorsModule())
-	RegisteredModules = append(RegisteredModules, NewJsonModule())
-	RegisteredModules = append(RegisteredModules, NewTimeModule())
-	RegisteredModules = append(RegisteredModules, NewPathModule())
-	RegisteredModules = append(RegisteredModules, NewRuntimeModule())
-	RegisteredModules = append(RegisteredModules, NewZipModule())
-	RegisteredModules = append(RegisteredModules, NewEnvModule())
-	RegisteredModules = append(RegisteredModules, NewFsModule())
-	RegisteredModules = append(RegisteredModules, NewHttpModule())
-
+	RegisteredModules = []definitions.GruModule{
+		NewAssertModule(),
+		NewColorsModule(),
+		NewJsonModule(),
+		NewTimeModule(),
+		NewPathModule(),
+		NewRuntimeModule(),
+		NewZipModule(),
+		NewEnvModule(),
+		NewFsModule(),
+		NewHttpModule(),
+	}
 }
 
 // Registers all default Gru modules into Lua tables accessed through the default "gru" global table.
