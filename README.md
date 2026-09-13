@@ -20,10 +20,16 @@ print(gru.colors.light_blue(fullPath))
 
 ## Current Modules
 
+- `gru.assert`
 - `gru.colors`
+- `gru.env`
+- `gru.fs`
+- `gru.http`
 - `gru.time`
 - `gru.path`
 - `gru.json`
+- `gru.runtime`
+- `gru.zip`
 
 ## CLI
 
