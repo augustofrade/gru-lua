@@ -7,7 +7,10 @@ import (
 	"github.com/augustofrade/gru-lua/gru/definitions"
 )
 
-const runtimeCurrentVersion string = "0.0.2"
+var (
+	CurrentBuildVersion = "unknown"
+	CurrentBuildDate    = "N/A"
+)
 
 var _l *lua.State
 

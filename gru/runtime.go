@@ -20,7 +20,7 @@ func NewRuntimeModule() definitions.GruModule {
 }
 
 func runtimeVersion(l *lua.State) int {
-	l.PushString(runtimeCurrentVersion)
+	l.PushString(CurrentBuildDate)
 	return 1
 }
 

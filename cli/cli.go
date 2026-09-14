@@ -48,6 +48,7 @@ func handleFile(file *string) {
 }
 
 func helpCommand() {
+	fmt.Printf("Gru v%s (%s)\n\n", gru.CurrentBuildVersion, gru.CurrentBuildDate)
 	fmt.Println("Available commands:")
 	fmt.Println("init    <path>     Inits a git repository in the provided path, alongside .gitignore and gru type annotations files. Defaults to current dir")
 	fmt.Println("types   <path>     Creates a gru type annotations file in the given path. Defaults to current dir")
