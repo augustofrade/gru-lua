@@ -80,6 +80,13 @@ func buildTypeAnnotations() []byte {
 				}
 			}
 		}
+
+		if len(module.Aliases) > 0 {
+			builder.WriteString("\n-- Aliases of this Module\n")
+			for _, t := range module.Aliases {
+				fmt.Fprintf(&builder, "---@alias %s %s %s\n", t.Name, t.To, t.Description)
+			}
+		}
 	}
 
 	moduleListBuilder.WriteString("\n---@type Gru\ngru = gru")
