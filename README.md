@@ -5,6 +5,8 @@ Gru is a Lua runtime with useful modules and a simple CLI to run Lua scripts, ma
 It keeps regular Lua syntax and behavior and adds extra utilities under the global `gru` table,
 all with documented type annotations.
 
+Save the following in a `main.lua` file and run it with `gru main.lua`!
+
 ```lua
 
 -- Make a PATCH request with JSON body
