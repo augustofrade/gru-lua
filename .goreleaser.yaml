@@ -1,0 +1,53 @@
+version: 2
+
+project_name: gru
+
+before:
+  hooks:
+    - go mod download
+
+builds:
+  - id: gru
+    main: ./main.go
+    binary: gru
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+    goarch:
+      - amd64
+    no_unique_dist_dir: true
+    ldflags:
+      - -s -w -X github.com/augustofrade/gru-lua/gru.CurrentBuildVersion={{ .Version }} -X github.com/augustofrade/gru-lua/gru.CurrentBuildDate={{ .Date }}
+
+archives:
+  - id: raw-binaries
+    ids:
+      - gru
+    formats:
+      - binary
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+nfpms:
+  - id: linux-packages
+    ids:
+      - gru
+    package_name: gru
+    formats:
+      - deb
+      - archlinux
+    vendor: augustofrade
+    homepage: https://github.com/augustofrade/gru-lua
+    maintainer: augustofrade
+    description: Lua runtime with useful modules and a simple CLI to run Lua scripts.
+    section: default
+    priority: optional
+    bindir: /usr/bin
+    file_name_template: "{{ .PackageName }}-{{ .Version }}-{{ .Arch }}"
+
+checksum:
+  disable: true
+
+changelog:
+  disable: true
