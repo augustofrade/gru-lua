@@ -31,13 +31,13 @@ func modulesCommand(maxModuleSize int, specifiedModule string) {
 		return
 	}
 
-	fmt.Printf("[%d function(s)]  %s\n", len(module.Functions), module.Description)
+	fmt.Printf("[%d function(s)]  %s - %s\n", len(module.Functions), module.Name, module.Description)
 	printModuleInfo(*module, 0)
 }
 
 func printAllModulesInfo(maxModuleSize int) {
 	for _, module := range gru.RegisteredModules {
-		fmt.Printf("%s [%d]  %s\n", module.Name, len(module.Functions), module.Description)
+		fmt.Printf("\n%s [%d]  %s\n", module.Name, len(module.Functions), module.Description)
 
 		printModuleInfo(module, maxModuleSize)
 	}
@@ -55,13 +55,22 @@ func printModuleInfo(module definitions.GruModule, maxModuleSize int) {
 		function := module.Functions[i]
 		fmt.Fprintf(&builder, "  %s(", function.Name)
 
-		for _, param := range function.Parameters {
-			fmt.Fprintf(&builder, "%s: %s", param.Name, param.Type)
-			fmt.Fprintf(&paramBuilder, "    @param %s: %s   %s\n", param.Name, param.Type, param.Description)
+		for i, param := range function.Parameters {
+			paramTemplate := "%s: %s"
+			if i < len(function.Parameters)-1 {
+				paramTemplate += ", "
+			}
+			fmt.Fprintf(&builder, paramTemplate, param.Name, param.Type)
+			fmt.Fprintf(&paramBuilder, "      @param %s: %s   %s\n", param.Name, param.Type, param.Description)
 		}
 
 		fmt.Fprintf(&builder, ")\n    %s\n", function.Description)
 		builder.WriteString(paramBuilder.String())
+
+		if len(function.ReturnTypes) > 0 {
+			fmt.Fprintf(&builder, "      @returns %s\n", strings.Join(function.ReturnTypes, ", "))
+		}
+		builder.WriteString("\n")
 
 		remainingFuncs := functionAmount - maxModuleSize
 		if remainingFuncs > 0 && i > 0 && i == maxModuleSize-1 {
