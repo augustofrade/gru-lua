@@ -20,16 +20,16 @@ print(gru.colors.light_blue(fullPath))
 
 ## Current Modules
 
-- `gru.assert`
-- `gru.colors`
-- `gru.env`
-- `gru.fs`
-- `gru.http`
-- `gru.time`
-- `gru.path`
-- `gru.json`
-- `gru.runtime`
-- `gru.zip`
+- `gru.assert`: Assertions and runtime validations
+- `gru.colors`: Terminal string coloring helpers
+- `gru.env`: Environment variable access and management
+- `gru.fs`: File system operations
+- `gru.http`: HTTP requests
+- `gru.time`: Time and date utilities
+- `gru.path`: Path manipulation functions
+- `gru.json`: JSON parsing and serialization
+- `gru.runtime`: Runtime metadata and error hooks
+- ~~`gru.zip`: ZIP archive creation utilities~~ (TBD)
 
 ## CLI
 
