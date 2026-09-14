@@ -1,15 +1,48 @@
 # Gru
 
-Gru is an experimental Lua runtime built with Go.
+Gru is a Lua runtime with useful modules and a simple CLI to run Lua scripts, made in Go.
 
 It keeps regular Lua syntax and behavior and adds extra utilities under the global `gru` table,
 all with documented type annotations.
 
 ```lua
-local basename = gru.path.basename("~/Downloads/image.jpg")
-local fullPath = gru.path.join("~/Documents", "assets", "sprites", basename)
 
-print(gru.colors.light_blue(fullPath))
+-- Make a PATCH request with JSON body
+local resp, err = gru.http.patch("https://jsonplaceholder.typicode.com/posts/1", {
+  headers = {
+    ["Content-Type"] = "application/json",
+  },
+  body = {
+    title = "Gru's post",
+  }
+})
+
+if err then
+  print("Error:", err)
+  return
+end
+
+-- Assert response status is as expected
+gru.assert.equals(resp.status, 200)
+
+-- Parse JSON
+local json = resp.body:json()
+
+-- Assert response JSON is as expected
+gru.assert.not_empty(json, "Result JSON")
+
+gru.assert.has_keys(json, { "userId", "id", "title", "body" }, "json")
+gru.assert.equals(json.title, "Gru's post", "json.title")
+
+-- Nice success message
+print(gru.colors.green("PATCH request successful. Updated title:"), json.title)
+
+-- Build the response file path with a nice API
+local filename = "gru-" .. gru.time.unix() .. "-http-response.json"
+local distPath = gru.path.join("./", "http", filename)
+
+-- Directly save the JSON in a file
+gru.json.dump(distPath, json)
 ```
 
 ## Why Gru
