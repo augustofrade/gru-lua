@@ -13,6 +13,7 @@ func NewEnvModule() definitions.GruModule {
 	module.FunctionBuilder("set", "Sets an environment variable. Returns an error string", envSet).
 		StringParam("key", "Key of the environment variable.").
 		StringParam("value", "value to be assigned on the key of the environment variable.").
+		ReturnsError().
 		Register()
 	module.FunctionBuilder("get", " retrieves the value of the environment variable named by the key. It returns the value, which will be empty if the variable is not present.", envGet).
 		StringParam("key", "Key of the environment variable.").
@@ -22,6 +23,7 @@ func NewEnvModule() definitions.GruModule {
 		Register()
 	module.FunctionBuilder("unset", "Unsets the environment variable", envUnset).
 		StringParam("key", "Key to be unset").
+		ReturnsError().
 		Register()
 	module.FunctionBuilder("lookup", "Looks for the environment variable. Returns the value and true if the key exists, even if the value is empty.", envLookup).
 		StringParam("key", "Key to be unset").

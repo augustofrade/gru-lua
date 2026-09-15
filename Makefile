@@ -1,5 +1,5 @@
-GRU_RUNTIME_CURRENT_VERSION := $(patsubst v%,%,$(shell git describe --tags --abbrev=0))
-GRU_BUILD_DATE := $(shell date -u +%Y-%m-%dT%H:%M:%SZ) local build
+GRU_RUNTIME_CURRENT_VERSION := $(patsubst v%,%,$(shell git describe --tags --abbrev=0)) dev build
+GRU_BUILD_DATE := $(shell date -u +%Y-%m-%dT%H:%M:%SZ) dev build
 
 build:
 	go build \
