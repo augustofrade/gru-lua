@@ -26,8 +26,7 @@ func timeSleep(l *lua.State) int {
 	}
 
 	time.Sleep(time.Duration(secs) * time.Second)
-	l.PushNil()
-	return 1
+	return 0
 }
 
 func timeUnix(l *lua.State) int {

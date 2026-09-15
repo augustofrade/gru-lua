@@ -11,6 +11,12 @@ import (
 
 func NewPathModule() definitions.GruModule {
 	module := definitions.NewModule("path", "System Path operations")
+
+	module.HasCustomType("GruPathInfo", "Information about a system path").
+		StringProp("dir", "Full directory of the path").
+		StringProp("file", "Filename with extension").
+		StringProp("ext", "Extension of the path")
+
 	module.FunctionBuilder("basename", "Returns the last portion of the path.", pathBasename).
 		StringParam("path", "").
 		ReturnsStringWithError().
@@ -39,7 +45,7 @@ func NewPathModule() definitions.GruModule {
 		"Parses a path by separating it into a directory, file and extension names. If there is no slash in path, split returns an empty dir and file set to path.",
 		pathParse).
 		StringParam("path", "Path to be parsed.").
-		ReturnsWithError("table").
+		ReturnsWithError("GruPathInfo").
 		Register()
 	module.FunctionBuilder("absolute",
 		"Returns an absolute representation of a path. If the path is not absolute it will be joined with the current working directory to turn it into an absolute path.",

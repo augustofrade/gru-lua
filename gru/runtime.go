@@ -1,6 +1,8 @@
 package gru
 
 import (
+	"fmt"
+
 	"github.com/Shopify/go-lua"
 	"github.com/augustofrade/gru-lua/gru/definitions"
 	"github.com/augustofrade/gru-lua/gru/internal/luautil"
@@ -20,7 +22,7 @@ func NewRuntimeModule() definitions.GruModule {
 }
 
 func runtimeVersion(l *lua.State) int {
-	l.PushString(CurrentBuildDate)
+	l.PushString(fmt.Sprintf("v%s", CurrentBuildVersion))
 	return 1
 }
 

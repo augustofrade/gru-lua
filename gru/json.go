@@ -18,7 +18,7 @@ func NewJsonModule() definitions.GruModule {
 		Register()
 	module.FunctionBuilder("parse", "Parses a JSON string into a table.", jsonParse).
 		StringParam("json", "The JSON string to be parsed").
-		Returns("table").
+		ReturnsWithError("table").
 		Register()
 
 	module.FunctionBuilder("dump", "Serializes a table to JSON and writes it to a file. Returns nil, error on failure.", jsonDump).
