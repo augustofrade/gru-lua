@@ -10,7 +10,7 @@ Save the following in a `main.lua` file and run it with `gru main.lua`!
 ```lua
 
 -- Make a PATCH request with JSON body
-local resp, err = gru.http.patch("https://jsonplaceholder.typicode.com/posts/1", {
+local resp, err =[ gru.http.patch(](./docs//modules/http.md)"https://jsonplaceholder.typicode.com/posts/1", {
   headers = {
     ["Content-Type"] = "application/json",
   },
@@ -24,27 +24,27 @@ if err then
   return
 end
 
--- Assert response status is as expected
-gru.assert.equals(resp.status, 200)
+-- Assert response status is as expected[
+gru.assert.equals(](./docs//modules/assert.md)resp.status, 200)
 
 -- Parse JSON
 local json = resp.body:json()
 
--- Assert response JSON is as expected
-gru.assert.not_empty(json, "Result JSON")
-
-gru.assert.has_keys(json, { "userId", "id", "title", "body" }, "json")
-gru.assert.equals(json.title, "Gru's post", "json.title")
+-- Assert response JSON is as expected[
+gru.assert.not_empty(](./docs//modules/assert.md)json, "Result JSON")
+[
+gru.assert.has_keys(](./docs//modules/assert.md)json, { "userId", "id", "title", "body" }, "json")[
+gru.assert.equals(](./docs//modules/assert.md)json.title, "Gru's post", "json.title")
 
 -- Nice success message
-print(gru.colors.green("PATCH request successful. Updated title:"), json.title)
+print[(gru.colors.](./docs//modules/colors.md)green("PATCH request successful. Updated title:"), json.title)
 
 -- Build the response file path with a nice API
-local filename = "gru-" .. gru.time.unix() .. "-http-response.json"
-local distPath = gru.path.join("./", "http", filename)
+local filename = "gru-" ..[ gru.time.unix(](./docs//modules/time.md)) .. "-http-response.json"
+local distPath =[ gru.path.join(](./docs//modules/path.md)"./", "http", filename)
 
--- Directly save the JSON in a file
-gru.json.dump(distPath, json)
+-- Directly save the JSON in a file[
+gru.json.dump(](./docs//modules/json.md)distPath, json)
 ```
 
 ## Why Gru
@@ -55,16 +55,16 @@ gru.json.dump(distPath, json)
 
 ## Current Modules
 
-- `gru.assert`: Assertions and runtime validations
-- `gru.colors`: Terminal string coloring helpers
-- `gru.env`: Environment variable access and management
-- `gru.fs`: File system operations
-- `gru.http`: HTTP requests
-- `gru.time`: Time and date utilities
-- `gru.path`: Path manipulation functions
-- `gru.json`: JSON parsing and serialization
-- `gru.runtime`: Runtime metadata and error hooks
-- ~~`gru.zip`: ZIP archive creation utilities~~ (TBD)
+- [`gru.assert`](./docs/modules/assert.md): Assertions and runtime validations
+- [`gru.colors`](./docs/modules/colors.md): Terminal string coloring helpers
+- [`gru.env`](./docs/modules/env.md): Environment variable access and management
+- [`gru.fs`](./docs/modules/fs.md): File system operations
+- [`gru.http`](./docs/modules/http.md): HTTP requests
+- [`gru.time`](./docs/modules/time.md): Time and date utilities
+- [`gru.path`](./docs/modules/path.md): Path manipulation functions
+- [`gru.json`](./docs/modules/json.md): JSON parsing and serialization
+- [`gru.runtime`](./docs/modules/runtime.md): Runtime metadata and error hooks
+- ~~[`gru.zip`](./docs/modules/zip.md): ZIP archive creation utilities~~ (TBD)
 
 ## CLI
 
